@@ -1,0 +1,48 @@
+[
+ {
+  "arm": "vis27b",
+  "label": "Qwen 27B + head (image board)",
+  "games": 10,
+  "food_total": 66,
+  "food_mean": 6.6,
+  "food_best": 14,
+  "steps_mean": 63.7,
+  "median_ms": 157.98091874999898,
+  "deaths": {
+   "self": 8,
+   "wall": 1,
+   "starved": 1
+  },
+  "cost": 0
+ },
+ {
+  "arm": "vis9b",
+  "label": "Qwen 9B + head (image board)",
+  "games": 10,
+  "food_total": 19,
+  "food_mean": 1.9,
+  "food_best": 4,
+  "steps_mean": 14.2,
+  "median_ms": 102.44567200000176,
+  "deaths": {
+   "self": 7,
+   "wall": 3
+  },
+  "cost": 0
+ },
+ {
+  "arm": "vis4b",
+  "label": "Qwen 4B + head (image board)",
+  "games": 10,
+  "food_total": 17,
+  "food_mean": 1.7,
+  "food_best": 4,
+  "steps_mean": 11.2,
+  "median_ms": 72.68644774999999,
+  "deaths": {
+   "self": 7,
+   "wall": 3
+  },
+  "cost": 0
+ }
+]

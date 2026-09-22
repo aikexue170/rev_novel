@@ -111,6 +111,16 @@ Everything runs on [Modal](https://modal.com); the only secret is an OpenRouter 
 | `synth_workflows.py`, `train_synth.py` | Official-style synthetic workflow packets and the warm start on them. |
 | `kev_eval.py` | Kev's released checkpoints through their own serving path. |
 | `post_charts.py` | Draws the charts in this README into `post/`. |
-| `snake_arena.py`, `snake_vision.py`, `snake_replay.py` | The Snake arena. Over 10 games with identical seeds and a 1,000-move cap, Qwen3.8-27B ate 201 food, Jev 144, Qwen3.5-4B 114 and Qwen3.5-9B 109. Replay in `results/snake/replay.html`. |
+| `snake_arena.py`, `snake_vision.py`, `snake_replay.py` | The Snake arena (text and image boards) and its replay pages; see below. |
 | `eval_sets/` | The frozen evaluation sets with checksums. Nothing in them was used for training. |
 | `results/` | The full load-test report with every concurrency level, the cache-busted multi-question runs, Jev's official-set results, and the Snake arena summary. |
+
+## Snake
+
+For fun, and because a decision model should be able to play a game one multiple-choice question at a time: each turn the player gets the board and is asked which direction to move. Same seeds for everyone, 10 games, a 1,000-move cap. Qwen3.8-27B ate 201 food, Hosted Jev 144, Qwen3.5-4B 114, Qwen3.5-9B 109. This is game 5, where Jev runs into itself at move 38 and the 27B keeps going to 185.
+
+![Snake head-to-head](results/snake/headtohead.gif)
+
+Live replay with all ten games: [`results/snake/replay.html`](results/snake/replay.html). The head-to-head above: [`results/snake/headtohead.html`](results/snake/headtohead.html).
+
+**It takes images too.** The backbone is a vision-language model, so the same text-trained LoRA and head can be handed the board as a PNG instead of text, with no coordinates anywhere in the prompt. Nothing was retrained for this. Under a 200-move cap the 27B ate 66 food from the image board over 10 games against 173 to 189 from the text board, so it plays worse from pixels but it plays, with a head that never saw an image during training. Jev is text only, so there is no Jev number here. Details in [`results/snake/vision/`](results/snake/vision/).

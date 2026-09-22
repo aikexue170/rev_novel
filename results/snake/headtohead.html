@@ -126,6 +126,7 @@ function fit(p){
   if(p.canvas.width!==w){p.canvas.width=w;p.canvas.height=w}
   p.size=w;
 }
+const BOARD_RGB=[10,15,28];function mix(hex,a,g){const k=a+(1-a)*g,n=parseInt(hex.slice(1),16),c=[n>>16&255,n>>8&255,n&255].map((v,i)=>Math.round(v*k+BOARD_RGB[i]*(1-k)));return `rgb(${c[0]},${c[1]},${c[2]})`}
 function rr(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
 
 function draw(p,t,now){
@@ -156,9 +157,8 @@ function draw(p,t,now){
           if(x===px)ctx.fillRect(X(bx)+inset,Y(by)+cell/2,w,cell);else ctx.fillRect(X(bx)+cell/2,Y(by)+inset,cell,w)}}}};
   ctx.save();ctx.shadowColor=p.col;ctx.shadowBlur=cell*0.7;ctx.fillStyle=p.col;ctx.globalAlpha=dead?.55:.9;body();ctx.restore();
   // body gradient: head bright -> tail dim
-  for(let i=s.length-1;i>=1;i--){const [x,y]=s[i],[px,py]=s[i-1];const a=0.35+0.55*(1-i/s.length);ctx.globalAlpha=(dead?.6:1)*a;ctx.fillStyle=p.col;rr(ctx,X(x)+inset,Y(y)+inset,w,w,r);ctx.fill();
+  for(let i=s.length-1;i>=1;i--){const [x,y]=s[i],[px,py]=s[i-1];const a=0.35+0.55*(1-i/s.length);ctx.fillStyle=mix(p.col,(dead?.6:1)*a,dead?.55:.9);rr(ctx,X(x)+inset,Y(y)+inset,w,w,r);ctx.fill();
     if(Math.abs(x-px)+Math.abs(y-py)===1){const bx=Math.min(x,px),by=Math.min(y,py);if(x===px)ctx.fillRect(X(bx)+inset,Y(by)+cell/2,w,cell);else ctx.fillRect(X(bx)+cell/2,Y(by)+inset,cell,w)}}
-  ctx.globalAlpha=1;
   // head
   const [hx,hy]=s[0];ctx.save();ctx.shadowColor=p.head;ctx.shadowBlur=cell*0.6;ctx.fillStyle=p.head;rr(ctx,X(hx)+inset*.6,Y(hy)+inset*.6,cell-inset*1.2,cell-inset*1.2,r);ctx.fill();ctx.restore();
   // eyes
@@ -205,6 +205,9 @@ document.getElementById('arena').addEventListener('click',togglePause);
 window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();togglePause()}});
 window.addEventListener('resize',()=>P.forEach(p=>draw(p,t,performance.now())));
 window.replay={goto(n){t=Math.max(0,Math.min(MAXT,n|0));acc=0;holdStart=0},get t(){return t},get paused(){return paused},pause(){if(!paused)togglePause()},play(){if(paused)togglePause()}};
+// optional deep link, e.g. #t=38&paused=1&chrome=0 (ignored if absent)
+function applyHash(){try{const h=new URLSearchParams(location.hash.slice(1));if(h.has('t'))window.replay.goto(+h.get('t'));if(h.get('paused')==='1')window.replay.pause();if(h.get('chrome')==='0'){statusEl.style.visibility='hidden';const st=document.createElement('style');st.textContent='.caption{transition:none}.val.bump{animation:none}';document.head.appendChild(st)}}catch(e){}}
+applyHash();window.addEventListener('hashchange',applyHash);
 requestAnimationFrame(frame);
 </script>
 </body>

@@ -1,0 +1,21 @@
+{
+  "app_id": "ap-Izy9pSViHcdvvzCkje4WIv",
+  "call_id": "fc-01M35B0WVMF7ZHQ6S2P8H0AGAP",
+  "arms": [
+    {
+      "name": "vis27b",
+      "url": "https://reprompt--jev-beat-vision-vis27b.us-west.modal.direct"
+    },
+    {
+      "name": "vis9b",
+      "url": "https://reprompt--jev-beat-vision-vis9b.us-west.modal.direct"
+    },
+    {
+      "name": "vis4b",
+      "url": "https://reprompt--jev-beat-vision-vis4b.us-west.modal.direct"
+    }
+  ],
+  "games": 10,
+  "grid": 10,
+  "max_steps": 200
+}

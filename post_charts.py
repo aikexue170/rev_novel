@@ -35,7 +35,7 @@ triptych('hero_official',"Jev's official 102 workflow questions",'Jev\'s publish
 import json
 BL=json.loads((pathlib.Path(__file__).resolve().parent/'post/holdout_latency_by_length.json').read_text())
 fig,ax=plt.subplots(figsize=(8.5,5));fig.subplots_adjust(left=.1,right=.8,top=.8,bottom=.14)
-fig.text(.03,.92,'Latency vs input length',fontsize=16,weight='bold');fig.text(.03,.855,'975-question holdout bucketed by input tokens, one request in flight, end-to-end p50. n per bucket: '+', '.join(f"{b['bucket']} {b['n']}" for b in BL['arms']['jev'])+'.',fontsize=10,color=INK2)
+fig.text(.03,.92,'Latency vs input length',fontsize=16,weight='bold');fig.text(.03,.855,'975-question holdout bucketed by input tokens (Qwen tokenizer), one request in flight, end-to-end p50.',fontsize=10,color=INK2)
 xs=range(len(BL['labels']))
 for a in ORDER:
  ys=[b['p50'] for b in BL['arms'][a]];ax.plot(list(xs),ys,'-o',lw=2.2,ms=6,color=color(a));ax.annotate(NAMES[a],(len(ys)-1,ys[-1]),xytext=(8,0),textcoords='offset points',va='center',fontsize=10.5)

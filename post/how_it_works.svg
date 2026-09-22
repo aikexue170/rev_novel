@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 600" width="960" height="600" font-family="-apple-system, Segoe UI, Helvetica, Arial, sans-serif" font-size="14">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#52514e"/>
+    </marker>
+  </defs>
+  <rect width="960" height="600" fill="#fcfcfb"/>
+
+  <!-- 1. input sequence -->
+  <text x="24" y="34" font-size="13" fill="#52514e" font-weight="600">1. One sequence per question, no chat template</text>
+  <g font-size="13">
+    <rect x="24" y="46" width="150" height="40" rx="6" fill="#eef1f6" stroke="#cfd4dd"/>
+    <text x="99" y="63" text-anchor="middle" fill="#0b0b0b">State:</text>
+    <text x="99" y="79" text-anchor="middle" fill="#52514e">document or record</text>
+
+    <rect x="184" y="46" width="150" height="40" rx="6" fill="#eef1f6" stroke="#cfd4dd"/>
+    <text x="259" y="63" text-anchor="middle" fill="#0b0b0b">Question:</text>
+    <text x="259" y="79" text-anchor="middle" fill="#52514e">instructions</text>
+
+    <rect x="344" y="46" width="118" height="40" rx="6" fill="#eef1f6" stroke="#cfd4dd"/>
+    <text x="403" y="63" text-anchor="middle" fill="#0b0b0b">A: option text</text>
+    <rect x="440" y="52" width="16" height="28" rx="3" fill="#1baf7a" opacity=".85"/>
+
+    <rect x="470" y="46" width="118" height="40" rx="6" fill="#eef1f6" stroke="#cfd4dd"/>
+    <text x="529" y="63" text-anchor="middle" fill="#0b0b0b">B: option text</text>
+    <rect x="566" y="52" width="16" height="28" rx="3" fill="#1baf7a" opacity=".85"/>
+
+    <rect x="596" y="46" width="118" height="40" rx="6" fill="#eef1f6" stroke="#cfd4dd"/>
+    <text x="655" y="63" text-anchor="middle" fill="#0b0b0b">C: option text</text>
+    <rect x="692" y="52" width="16" height="28" rx="3" fill="#1baf7a" opacity=".85"/>
+
+    <rect x="724" y="46" width="90" height="40" rx="6" fill="#eef1f6" stroke="#cfd4dd"/>
+    <text x="769" y="70" text-anchor="middle" fill="#0b0b0b">Decision:</text>
+    <rect x="792" y="52" width="16" height="28" rx="3" fill="#2a78d6" opacity=".9"/>
+
+    <text x="830" y="60" fill="#1baf7a" font-size="12">last token of each option</text>
+    <text x="830" y="78" fill="#2a78d6" font-size="12">decision token</text>
+  </g>
+
+  <!-- arrow down -->
+  <line x1="880" y1="92" x2="880" y2="124" stroke="#52514e" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- 2. backbone -->
+  <text x="24" y="118" font-size="13" fill="#52514e" font-weight="600">2. Frozen Qwen backbone (BF16), rank-16 LoRA on every layer's attention and DeltaNet projections</text>
+  <rect x="24" y="128" width="790" height="150" rx="10" fill="#ffffff" stroke="#cfd4dd"/>
+  <g font-size="12">
+    <rect x="44" y="142" width="640" height="24" rx="4" fill="#f3f4f0" stroke="#dcdcd6"/><text x="56" y="158" fill="#0b0b0b">layer 1: attention or gated DeltaNet + MLP</text>
+    <rect x="696" y="142" width="100" height="24" rx="4" fill="#fff3ea" stroke="#eb6834"/><text x="746" y="158" text-anchor="middle" fill="#eb6834" font-weight="600">+ LoRA r=16</text>
+
+    <rect x="44" y="172" width="640" height="24" rx="4" fill="#f3f4f0" stroke="#dcdcd6"/><text x="56" y="188" fill="#0b0b0b">layer 2</text>
+    <rect x="696" y="172" width="100" height="24" rx="4" fill="#fff3ea" stroke="#eb6834"/><text x="746" y="188" text-anchor="middle" fill="#eb6834" font-weight="600">+ LoRA r=16</text>
+
+    <text x="364" y="222" text-anchor="middle" fill="#52514e" font-size="16">· · ·</text>
+
+    <rect x="44" y="234" width="640" height="24" rx="4" fill="#f3f4f0" stroke="#dcdcd6"/><text x="56" y="250" fill="#0b0b0b">layer N (32 to 64)</text>
+    <rect x="696" y="234" width="100" height="24" rx="4" fill="#fff3ea" stroke="#eb6834"/><text x="746" y="250" text-anchor="middle" fill="#eb6834" font-weight="600">+ LoRA r=16</text>
+  </g>
+  <text x="830" y="160" fill="#52514e" font-size="12">LoRA: 0.4% of the</text>
+  <text x="830" y="176" fill="#52514e" font-size="12">weights (15.7M on the</text>
+  <text x="830" y="192" fill="#52514e" font-size="12">4B), merged at serving</text>
+  <text x="830" y="222" fill="#52514e" font-size="12">no LM head, no</text>
+  <text x="830" y="238" fill="#52514e" font-size="12">vocabulary projection,</text>
+  <text x="830" y="254" fill="#52514e" font-size="12">no decoding</text>
+
+  <!-- 3. readouts -->
+  <text x="24" y="312" font-size="13" fill="#52514e" font-weight="600">3. Read the final hidden state at five positions</text>
+  <line x1="240" y1="278" x2="240" y2="330" stroke="#2a78d6" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="600" y1="278" x2="600" y2="330" stroke="#1baf7a" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <rect x="120" y="334" width="240" height="54" rx="8" fill="#e9f1fb" stroke="#2a78d6"/>
+  <text x="240" y="356" text-anchor="middle" fill="#0b0b0b" font-weight="600">decision token → W_q</text>
+  <text x="240" y="376" text-anchor="middle" fill="#52514e" font-size="12">one 256-d query vector</text>
+
+  <rect x="480" y="334" width="240" height="54" rx="8" fill="#e8f7f0" stroke="#1baf7a"/>
+  <text x="600" y="356" text-anchor="middle" fill="#0b0b0b" font-weight="600">each option's last token → W_k</text>
+  <text x="600" y="376" text-anchor="middle" fill="#52514e" font-size="12">one 256-d key vector per option</text>
+
+  <!-- 4. pointer head -->
+  <line x1="240" y1="388" x2="380" y2="424" stroke="#52514e" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="600" y1="388" x2="460" y2="424" stroke="#52514e" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="24" y="440" font-size="13" fill="#52514e" font-weight="600">4. Pointer head</text>
+  <rect x="300" y="428" width="240" height="46" rx="8" fill="#ffffff" stroke="#0b0b0b"/>
+  <text x="420" y="447" text-anchor="middle" fill="#0b0b0b" font-weight="600">score(option) = q · k_option / 16</text>
+  <text x="420" y="465" text-anchor="middle" fill="#52514e" font-size="12">softmax over the offered options only</text>
+
+  <!-- 5. output -->
+  <line x1="420" y1="474" x2="420" y2="504" stroke="#52514e" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="24" y="522" font-size="13" fill="#52514e" font-weight="600">5. Answer</text>
+  <g font-size="13">
+    <rect x="270" y="508" width="90" height="40" rx="6" fill="#f3f4f0" stroke="#dcdcd6"/><text x="315" y="533" text-anchor="middle" fill="#52514e">A  0.06</text>
+    <rect x="370" y="508" width="100" height="40" rx="6" fill="#e8f7f0" stroke="#1baf7a" stroke-width="2"/><text x="420" y="533" text-anchor="middle" fill="#0b0b0b" font-weight="700">B  0.81</text>
+    <rect x="480" y="508" width="90" height="40" rx="6" fill="#f3f4f0" stroke="#dcdcd6"/><text x="525" y="533" text-anchor="middle" fill="#52514e">C  0.13</text>
+  </g>
+  <text x="600" y="533" fill="#52514e" font-size="12">any number of options, 0 generated tokens</text>
+
+  <text x="24" y="580" fill="#52514e" font-size="12">Training: one epoch over 19,792 public decisions, each seen in two option orders with a KL consistency term, so the answer does not depend on where the right option sits. Only the LoRA and the head train.</text>
+</svg>

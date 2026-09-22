@@ -1,6 +1,6 @@
 """Charts for REV.md (the post). Numbers are the published ones from final/REPORT.md and the cache-busted multiq runs.
 
-usage: post_charts.py [out_dir=post]   -> hero_holdout.png, hero_official.png, latency_by_length.png, multiq.png, cost_concurrency.png, journey.png
+usage: post_charts.py [out_dir=post]   -> hero_holdout.png, latency_by_length.png, multiq.png, cost_concurrency.png, journey.png
 """
 import sys,pathlib
 import matplotlib;matplotlib.use('Agg')
@@ -26,16 +26,13 @@ def triptych(name,title,subtitle,panels):
  fig.savefig(out/(name+'.png'),dpi=170);fig.savefig(out/(name+'.svg'));plt.close(fig)
 pct=lambda v:f'{v:.1f}%';ms=lambda v:f'{v:.0f} ms';usd=lambda v:f'${v:.4f}'
 # 1. holdout: accuracy, speed, cost
-triptych('hero_holdout','975-question public holdout: accuracy, speed, cost','Same questions for every system. Speed = end-to-end p50, one request in flight. Cost = per 1,000 answers: Jev as billed, ours at Modal B200 list price at full load.',
- [('Accuracy','% correct',{'jev':84.7,'4b':87.6,'9b':88.7,'27b':91.1},pct,False),('Speed','milliseconds',{'jev':187,'4b':61,'9b':65,'27b':97},ms,True),('Cost','USD per 1,000 answers',{'jev':.0366,'4b':.0209,'9b':.0286,'27b':.0821},usd,True)])
-# 2. Jev's official set (speed and cost pending a run)
-triptych('hero_official',"Jev's official 102 workflow questions",'Jev\'s published invoice, agent-trace, customer-service and security decisions; labels are Jev\'s own.',
- [('Accuracy','% correct',{'jev':91/1.02,'4b':87/1.02,'9b':84/1.02,'27b':89/1.02},pct,False),('Speed','milliseconds',{},ms,True),('Cost','USD per 1,000 answers',{},usd,True)])
+triptych('hero_holdout','975-question public holdout: accuracy, speed, cost','Same questions for every system, both called from the same cloud client. Speed = end-to-end p50, one request in flight. Cost per 1,000 answers: Jev as billed, ours at Modal B200 list price at full load.',
+ [('Accuracy','% correct',{'jev':84.7,'4b':87.6,'9b':88.7,'27b':91.1},pct,False),('Speed, end to end','milliseconds',{'jev':187,'4b':61,'9b':65,'27b':97},ms,True),('Cost','USD per 1,000 answers',{'jev':.0366,'4b':.0209,'9b':.0286,'27b':.0821},usd,True)])
 # 3. latency vs input length, from the concurrency-1 pass of the holdout load test (post/holdout_latency_by_length.json)
 import json
 BL=json.loads((pathlib.Path(__file__).resolve().parent/'post/holdout_latency_by_length.json').read_text())
 fig,ax=plt.subplots(figsize=(8.5,5));fig.subplots_adjust(left=.1,right=.8,top=.8,bottom=.14)
-fig.text(.03,.92,'Latency vs input length',fontsize=16,weight='bold');fig.text(.03,.855,'975-question holdout bucketed by input tokens (Qwen tokenizer), one request in flight, end-to-end p50.',fontsize=10,color=INK2)
+fig.text(.03,.92,'End-to-end latency vs input length',fontsize=16,weight='bold');fig.text(.03,.855,'975-question holdout bucketed by input tokens (Qwen tokenizer), one request in flight, end-to-end p50.',fontsize=10,color=INK2)
 xs=range(len(BL['labels']))
 for a in ORDER:
  ys=[b['p50'] for b in BL['arms'][a]];ax.plot(list(xs),ys,'-o',lw=2.2,ms=6,color=color(a));ax.annotate(NAMES[a],(len(ys)-1,ys[-1]),xytext=(8,0),textcoords='offset points',va='center',fontsize=10.5)
@@ -44,7 +41,7 @@ fig.savefig(out/'latency_by_length.png',dpi=170);fig.savefig(out/'latency_by_len
 # 4. latency vs questions per request
 MQ={'jev':[152,154,160],'4b':[57,58,86],'9b':[57,59,103],'27b':[82,99,198]};sizes=[1,5,20]
 fig,ax=plt.subplots(figsize=(8.5,5));fig.subplots_adjust(left=.1,right=.8,top=.8,bottom=.14)
-fig.text(.03,.92,'Latency vs questions per request',fontsize=16,weight='bold');fig.text(.03,.855,'Same document, 1 / 5 / 20 questions in one request, one request in flight, end-to-end p50, cache-busted.',fontsize=10.5,color=INK2)
+fig.text(.03,.92,'End-to-end latency vs questions per request',fontsize=16,weight='bold');fig.text(.03,.855,'Same document, 1 / 5 / 20 questions in one request, one request in flight, end-to-end p50, cache-busted.',fontsize=10.5,color=INK2)
 for a in ORDER:
  ax.plot(sizes,MQ[a],'-o',lw=2.2,ms=6,color=color(a));ax.annotate(NAMES[a],(sizes[-1],MQ[a][-1]),xytext=(8,0),textcoords='offset points',va='center',fontsize=10.5)
 ax.set_xticks(sizes,[str(s) for s in sizes]);ax.set_xlabel('Questions per request');ax.set_ylabel('milliseconds');ax.set_ylim(0,230);ax.set_xlim(0,22);ax.grid(axis='y',color=GRID,lw=.8);ax.set_axisbelow(True);ax.tick_params(length=0,pad=6)

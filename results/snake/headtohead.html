@@ -156,7 +156,8 @@ function draw(p,t,now){
           if(x===px)ctx.fillRect(X(bx)+inset,Y(by)+cell/2,w,cell);else ctx.fillRect(X(bx)+cell/2,Y(by)+inset,cell,w)}}}};
   ctx.save();ctx.shadowColor=p.col;ctx.shadowBlur=cell*0.7;ctx.fillStyle=p.col;ctx.globalAlpha=dead?.55:.9;body();ctx.restore();
   // body gradient: head bright -> tail dim
-  for(let i=s.length-1;i>=1;i--){const [x,y]=s[i];const a=0.35+0.55*(1-i/s.length);ctx.globalAlpha=(dead?.6:1)*a;ctx.fillStyle=p.col;rr(ctx,X(x)+inset,Y(y)+inset,w,w,r);ctx.fill()}
+  for(let i=s.length-1;i>=1;i--){const [x,y]=s[i],[px,py]=s[i-1];const a=0.35+0.55*(1-i/s.length);ctx.globalAlpha=(dead?.6:1)*a;ctx.fillStyle=p.col;rr(ctx,X(x)+inset,Y(y)+inset,w,w,r);ctx.fill();
+    if(Math.abs(x-px)+Math.abs(y-py)===1){const bx=Math.min(x,px),by=Math.min(y,py);if(x===px)ctx.fillRect(X(bx)+inset,Y(by)+cell/2,w,cell);else ctx.fillRect(X(bx)+cell/2,Y(by)+inset,cell,w)}}
   ctx.globalAlpha=1;
   // head
   const [hx,hy]=s[0];ctx.save();ctx.shadowColor=p.head;ctx.shadowBlur=cell*0.6;ctx.fillStyle=p.head;rr(ctx,X(hx)+inset*.6,Y(hy)+inset*.6,cell-inset*1.2,cell-inset*1.2,r);ctx.fill();ctx.restore();

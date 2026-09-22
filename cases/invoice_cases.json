@@ -1,0 +1,789 @@
+[
+  {
+    "id": "case0",
+    "state": {
+      "invoice_id": "INV-A",
+      "ordered_quantity": 12,
+      "received_quantity": 10,
+      "unit_price_cents": 1250,
+      "invoice_total_cents": 12500,
+      "paid_invoice_ids": [
+        "INV-Z"
+      ],
+      "manager_approved": false,
+      "approval_threshold_cents": 10000
+    },
+    "questions": [
+      {
+        "id": "q09",
+        "instructions": "Are at least two ordered items still unreceived?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q01",
+        "instructions": "Has the entire ordered quantity been received?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q11",
+        "instructions": "Were more than ten items received?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q19",
+        "instructions": "Would manager approval alone fix all payment blockers? Require the received-items total to match, full receipt, no previous payment, and missing approval that is required strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q10",
+        "instructions": "Is the unit price at least 1000 cents?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q15",
+        "instructions": "Are all ordered items received and is this invoice not already paid?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q06",
+        "instructions": "Is the invoice total greater than the value of the received items?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q12",
+        "instructions": "Is the invoice total exactly equal to the approval threshold?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q17",
+        "instructions": "Are both the invoice total correct for received items and the approval requirement satisfied? Approval is needed only strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q02",
+        "instructions": "Is this invoice already listed as paid?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q00",
+        "instructions": "Does the invoice total equal received quantity times unit price?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q16",
+        "instructions": "Does this invoice have a total mismatch or a receipt shortfall?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q07",
+        "instructions": "Is the invoice total less than the value of the received items?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q03",
+        "instructions": "Is manager approval required? It is required only when the invoice total strictly exceeds the approval threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q05",
+        "instructions": "Should this invoice be paid? Require a matching received-items total, full receipt, no previous payment, and manager approval when strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q13",
+        "instructions": "Is manager approval recorded?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q14",
+        "instructions": "Is the paid invoice list empty?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q04",
+        "instructions": "Is required manager approval missing? Approval is required only strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q08",
+        "instructions": "Does the invoice total equal the value of all ordered items?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q18",
+        "instructions": "Is payment prevented by a previous payment even if all other checks were satisfied?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      }
+    ]
+  },
+  {
+    "id": "case1",
+    "state": {
+      "invoice_id": "INV-B",
+      "ordered_quantity": 8,
+      "received_quantity": 8,
+      "unit_price_cents": 2500,
+      "invoice_total_cents": 20000,
+      "paid_invoice_ids": [
+        "INV-B",
+        "INV-Z"
+      ],
+      "manager_approved": true,
+      "approval_threshold_cents": 20000
+    },
+    "questions": [
+      {
+        "id": "q04",
+        "instructions": "Is required manager approval missing? Approval is required only strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q09",
+        "instructions": "Are at least two ordered items still unreceived?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q15",
+        "instructions": "Are all ordered items received and is this invoice not already paid?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q14",
+        "instructions": "Is the paid invoice list empty?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q19",
+        "instructions": "Would manager approval alone fix all payment blockers? Require the received-items total to match, full receipt, no previous payment, and missing approval that is required strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q12",
+        "instructions": "Is the invoice total exactly equal to the approval threshold?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q00",
+        "instructions": "Does the invoice total equal received quantity times unit price?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q08",
+        "instructions": "Does the invoice total equal the value of all ordered items?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q10",
+        "instructions": "Is the unit price at least 1000 cents?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q03",
+        "instructions": "Is manager approval required? It is required only when the invoice total strictly exceeds the approval threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q05",
+        "instructions": "Should this invoice be paid? Require a matching received-items total, full receipt, no previous payment, and manager approval when strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q17",
+        "instructions": "Are both the invoice total correct for received items and the approval requirement satisfied? Approval is needed only strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q16",
+        "instructions": "Does this invoice have a total mismatch or a receipt shortfall?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q11",
+        "instructions": "Were more than ten items received?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q13",
+        "instructions": "Is manager approval recorded?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q18",
+        "instructions": "Is payment prevented by a previous payment even if all other checks were satisfied?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q02",
+        "instructions": "Is this invoice already listed as paid?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q06",
+        "instructions": "Is the invoice total greater than the value of the received items?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q01",
+        "instructions": "Has the entire ordered quantity been received?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q07",
+        "instructions": "Is the invoice total less than the value of the received items?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      }
+    ]
+  },
+  {
+    "id": "case2",
+    "state": {
+      "invoice_id": "INV-C",
+      "ordered_quantity": 15,
+      "received_quantity": 15,
+      "unit_price_cents": 499,
+      "invoice_total_cents": 7485,
+      "paid_invoice_ids": [],
+      "manager_approved": false,
+      "approval_threshold_cents": 10000
+    },
+    "questions": [
+      {
+        "id": "q18",
+        "instructions": "Is payment prevented by a previous payment even if all other checks were satisfied?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q15",
+        "instructions": "Are all ordered items received and is this invoice not already paid?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q04",
+        "instructions": "Is required manager approval missing? Approval is required only strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q09",
+        "instructions": "Are at least two ordered items still unreceived?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q13",
+        "instructions": "Is manager approval recorded?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q05",
+        "instructions": "Should this invoice be paid? Require a matching received-items total, full receipt, no previous payment, and manager approval when strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q12",
+        "instructions": "Is the invoice total exactly equal to the approval threshold?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q06",
+        "instructions": "Is the invoice total greater than the value of the received items?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q07",
+        "instructions": "Is the invoice total less than the value of the received items?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q01",
+        "instructions": "Has the entire ordered quantity been received?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q17",
+        "instructions": "Are both the invoice total correct for received items and the approval requirement satisfied? Approval is needed only strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q14",
+        "instructions": "Is the paid invoice list empty?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q19",
+        "instructions": "Would manager approval alone fix all payment blockers? Require the received-items total to match, full receipt, no previous payment, and missing approval that is required strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q10",
+        "instructions": "Is the unit price at least 1000 cents?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q08",
+        "instructions": "Does the invoice total equal the value of all ordered items?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q02",
+        "instructions": "Is this invoice already listed as paid?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q00",
+        "instructions": "Does the invoice total equal received quantity times unit price?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q16",
+        "instructions": "Does this invoice have a total mismatch or a receipt shortfall?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q03",
+        "instructions": "Is manager approval required? It is required only when the invoice total strictly exceeds the approval threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q11",
+        "instructions": "Were more than ten items received?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      }
+    ]
+  },
+  {
+    "id": "case3",
+    "state": {
+      "invoice_id": "INV-D",
+      "ordered_quantity": 9,
+      "received_quantity": 6,
+      "unit_price_cents": 250,
+      "invoice_total_cents": 1625,
+      "paid_invoice_ids": [
+        "INV-X"
+      ],
+      "manager_approved": true,
+      "approval_threshold_cents": 1500
+    },
+    "questions": [
+      {
+        "id": "q01",
+        "instructions": "Has the entire ordered quantity been received?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q05",
+        "instructions": "Should this invoice be paid? Require a matching received-items total, full receipt, no previous payment, and manager approval when strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q02",
+        "instructions": "Is this invoice already listed as paid?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q13",
+        "instructions": "Is manager approval recorded?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q17",
+        "instructions": "Are both the invoice total correct for received items and the approval requirement satisfied? Approval is needed only strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q14",
+        "instructions": "Is the paid invoice list empty?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q04",
+        "instructions": "Is required manager approval missing? Approval is required only strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q12",
+        "instructions": "Is the invoice total exactly equal to the approval threshold?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q08",
+        "instructions": "Does the invoice total equal the value of all ordered items?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q16",
+        "instructions": "Does this invoice have a total mismatch or a receipt shortfall?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q10",
+        "instructions": "Is the unit price at least 1000 cents?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q00",
+        "instructions": "Does the invoice total equal received quantity times unit price?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q03",
+        "instructions": "Is manager approval required? It is required only when the invoice total strictly exceeds the approval threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q15",
+        "instructions": "Are all ordered items received and is this invoice not already paid?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q06",
+        "instructions": "Is the invoice total greater than the value of the received items?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q18",
+        "instructions": "Is payment prevented by a previous payment even if all other checks were satisfied?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q19",
+        "instructions": "Would manager approval alone fix all payment blockers? Require the received-items total to match, full receipt, no previous payment, and missing approval that is required strictly above the threshold.",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q09",
+        "instructions": "Are at least two ordered items still unreceived?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "yes"
+      },
+      {
+        "id": "q07",
+        "instructions": "Is the invoice total less than the value of the received items?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      },
+      {
+        "id": "q11",
+        "instructions": "Were more than ten items received?",
+        "criteria": {
+          "yes": "The stated condition is true.",
+          "no": "The stated condition is false."
+        },
+        "expected": "no"
+      }
+    ]
+  }
+]

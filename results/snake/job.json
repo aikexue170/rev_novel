@@ -1,0 +1,25 @@
+{
+  "app_id": "ap-XHrJstV2V4bfz4ldsD4ZUy",
+  "call_id": "fc-01M35CKVH364DCP9ETS3J28CF1",
+  "arms": [
+    {
+      "name": "jev",
+      "url": "jev"
+    },
+    {
+      "name": "small4b",
+      "url": "https://reprompt--jev-beat-serve-small4b.us-west.modal.direct"
+    },
+    {
+      "name": "small9b",
+      "url": "https://reprompt--jev-beat-serve-small9b.us-west.modal.direct"
+    },
+    {
+      "name": "dense27b",
+      "url": "https://reprompt--jev-beat-serve-dense27b.us-west.modal.direct"
+    }
+  ],
+  "games": 10,
+  "grid": 10,
+  "max_steps": 1000
+}

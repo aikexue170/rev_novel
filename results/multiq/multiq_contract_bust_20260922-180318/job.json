@@ -1,0 +1,12 @@
+{
+  "app_id": "ap-JBZheOhlUKrRp1D2bmX8vJ",
+  "call_id": "fc-01M35JA4HEN4J8MR3XYKQ2143K",
+  "output": "/Users/rob/Documents/ChatGPT/Jev/experiments/beat/multiq_contract_bust_20260922-180318",
+  "cachebust": true,
+  "sizes": [
+    1,
+    5,
+    17
+  ],
+  "cases_file": "/Users/rob/Documents/ChatGPT/Jev/experiments/beat/contract_cases_test.json"
+}

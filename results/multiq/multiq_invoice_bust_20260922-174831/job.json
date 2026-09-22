@@ -1,0 +1,12 @@
+{
+  "app_id": "ap-NP21OnguSLczdqDsiYUUEU",
+  "call_id": "fc-01M35HF2Y9KSWB249MKCEPEW4Y",
+  "output": "/Users/rob/Documents/ChatGPT/Jev/experiments/beat/multiq_invoice_bust_20260922-174831",
+  "cachebust": true,
+  "sizes": [
+    1,
+    5,
+    20
+  ],
+  "cases_file": "/Users/rob/Documents/ChatGPT/Jev/experiments/beat/../pointer_speed/trained_20260921-161941/cases.json"
+}

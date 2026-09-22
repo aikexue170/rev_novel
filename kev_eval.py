@@ -3,7 +3,7 @@ serving-format path (api.to_record -> model.encode -> model.probs), one question
 
 usage: kev_eval.py [runs...]   default: jaredpalmer/kev-4b jaredpalmer/kev-9b
 """
-import sys,json,datetime
+import os,sys,json,datetime
 from pathlib import Path
 import modal
 HERE=Path(__file__).resolve().parent;KEV=Path(os.environ.get('KEV_DIR',HERE.parent/'kev'))   # a checkout of github.com/jaredpalmer/kev

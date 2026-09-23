@@ -152,7 +152,7 @@ From our own testing, the 27B tops both public Jev leaderboards, ahead of Jev an
 | [JevBench](https://benchmarkheaven.com/jev-models), 231 public items | 89.6% | 86.6% | 87.0% |
 | [Decision Index](https://huggingface.co/spaces/multimodalart/jev-decision-index), all 19 benchmarks, 77,591 requests | 59.8 | 59.5 | 55.7 |
 
-These are our measurements with each board's own scoring, not the boards' runs. The Decision Index lead is narrow: we're well ahead on contracts and tools and well behind on knowledge questions like GPQA and MMLU. We've asked JevBench to run the full suite ([#52](https://github.com/fstandhartinger/jevbench/issues/52)). No JevBench item was trained on, but we read our first model's misses on its public items to decide what synthetic data to make. Details in [`results/`](results/).
+These are our measurements with each board's own scoring, not the boards' runs. The Decision Index lead is narrow: we're well ahead on contracts and tools and well behind on knowledge questions like GPQA and MMLU. The 4B scores 49.7 there, ahead of every other 4B entry (the next is 47.4), but on JevBench's public items it trails the best 4B, 78.4% to 81.0%. We've asked JevBench to run the full suite ([#52](https://github.com/fstandhartinger/jevbench/issues/52)). No JevBench item was trained on, but we read our first model's misses on its public items to decide what synthetic data to make. Details in [`results/`](results/).
 
 ### Credit: Kev
 

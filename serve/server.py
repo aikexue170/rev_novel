@@ -368,7 +368,7 @@ class Small4h:
 class Small4b:
  @modal.enter()
  def start(self):serve('Qwen/Qwen3.5-4B',CHECKPOINTS['4b'])
-@app.server(image=blackwell_image,gpu='B200',compute_region='us-west',**{**COMMON,'max_containers':4,'min_containers':4})   # 4 warm GPUs for the full-suite run; set min_containers back to 0 afterwards
+@app.server(image=blackwell_image,gpu='B200',compute_region='us-west',**{**COMMON,'max_containers':4})   # up to 4 GPUs for full-suite benchmark runs
 class Small4jb:
  @modal.enter()
  def start(self):serve('Qwen/Qwen3.5-4B',CHECKPOINTS['4b_jb'])

@@ -110,6 +110,24 @@ Jev is pretty amazing as a concept and idea. It moved things forward and they ha
 
 **Kev.** Credit where it is due: [Kev](https://github.com/jaredpalmer/kev) by Jared Palmer was the first open reconstruction of Jev, and it is where the recipe comes from. Kev put a rank-16 LoRA and a pointer head on Qwen3.5-Base, published the weights, the training code and the serving path, and showed that a small open model can play Jev's game at all. We started from that recipe and changed the parts that limited it: Kev trains on about 12.6k short decisions and rejects states over 384 tokens, so it cannot read a contract; ours trains on states up to 4,096 tokens in two option orders, goes up to 27B, and gets its speed and cost from the batched serving stack rather than the model. With Kev's length guard lifted, Kev-9B scores 76.5% on our benchmark, which is what you would expect from a model that never saw a long document in training, and it beats us on the short classification tasks it was built for.
 
+## Run it
+
+Weights (LoRA adapters plus pointer head, about 60 MB for the 4B and 200 MB for the 27B) are on Hugging Face: [`robbalian/rev-qwen3.5-4b`](https://huggingface.co/robbalian/rev-qwen3.5-4b), [`robbalian/rev-qwen3.5-9b`](https://huggingface.co/robbalian/rev-qwen3.5-9b), [`robbalian/rev-qwen3.8-27b`](https://huggingface.co/robbalian/rev-qwen3.8-27b). `serve_local.py` is a plain FastAPI server with no Modal dependency: it pulls the pinned Qwen base from the Hub, merges the adapter, and serves the same `/score` contract as the benchmarks used.
+
+```bash
+pip install torch transformers fastapi uvicorn huggingface_hub
+python serve_local.py --repo robbalian/rev-qwen3.5-4b --port 8000
+```
+
+```bash
+curl -s localhost:8000/score -H 'content-type: application/json' -d '{
+  "state": {"invoice_total": 1250, "po_total": 1000, "vendor": "Acme"},
+  "questions": [{"id": "approve", "instructions": "Should this invoice be approved without review?",
+                 "criteria": {"yes": "Approve as is", "no": "Send to review"}}]}'
+```
+
+The answer comes back as a choice and a probability per option, with zero generated tokens. Any number of options works.
+
 ## Reproduce
 
 Everything runs on [Modal](https://modal.com); the only secret is an OpenRouter key in a Modal secret named `openrouter` for the Jev arm.
@@ -124,7 +142,9 @@ Everything runs on [Modal](https://modal.com); the only secret is an OpenRouter 
 | `head_only.py` | The frozen-backbone ablation and layer sweep. |
 | `synth_workflows.py`, `train_synth.py` | Official-style synthetic workflow packets and the warm start on them. |
 | `kev_eval.py` | Kev's released checkpoints through their own serving path. |
-| `post_charts.py` | Draws the charts in this README into `post/`. |
+| `refresh_numbers.py`, `post_charts.py` | Build `post/numbers.json` from one load-test run and one multi-question run, then draw the charts in this README. |
+| `serve_local.py`, `publish_weights.py` | Serve a checkpoint anywhere without Modal; package a training run into a Hugging Face repo with a model card. |
+| `synth_jevbench.py` | Generates the synthetic decisions (long policies, date and quantity arithmetic, multi-hop records, routing, traps, yes/no and ordered-level questions) with rule-derived labels and an overlap check against every eval set. |
 | `snake_arena.py`, `snake_vision.py`, `snake_replay.py` | The Snake arena (text and image boards) and its replay pages; see below. |
 | `eval_sets/` | The frozen evaluation sets with checksums. Nothing in them was used for training. |
 | `results/` | The full load-test report with every concurrency level, the cache-busted multi-question runs, Jev's official-set results, and the Snake arena summary. |

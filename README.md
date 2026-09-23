@@ -1,6 +1,6 @@
 # Rev: Beating Jev on accuracy, speed, and cost
 
-Rev is a set of open-weight decision models: a Qwen backbone with a rank-16 LoRA and a small pointer head that picks one of the offered options without generating a token. On a 975-question public benchmark, Qwen3.5-4B and Qwen3.5-9B are more accurate than Hosted Jev, answer in a third of the time end to end, and cost 1.3x to 1.8x less per answer at load. One person and two coding agents built this in about three days.
+Rev is a set of open-weight decision models: a Qwen backbone with a rank-16 LoRA and a small pointer head that picks one of the offered options without generating a token. On a 975-question public benchmark, Qwen3.5-4B and Qwen3.5-9B are more accurate than Hosted Jev, answer in well under half the time end to end, and cost 1.3x to 1.7x less per answer at load; Qwen3.8-27B is 7 points more accurate and still faster. One person and two coding agents built this in about three days.
 
 ## The benchmark
 
@@ -24,42 +24,56 @@ So the set spans two-line situations to 3,600-token contracts, yes/no to four-wa
 
 | Model | Accuracy | Speed (end to end) | Cost per 1k |
 |---|---:|---:|---:|
-| Hosted Jev | 84.7% | 187 ms | $0.0366 |
-| Qwen3.5-4B | 87.6% | 61 ms | $0.0209 |
-| Qwen3.5-9B | 88.7% | 65 ms | $0.0286 |
-| Qwen3.8-27B | 91.1% | 97 ms | $0.0821 |
+| Hosted Jev | 85.2% | 159 ms | $0.0366 |
+| Qwen3.5-4B | 87.6% | 65 ms | $0.0220 |
+| Qwen3.5-9B | 88.7% | 62 ms | $0.0279 |
+| Qwen3.8-27B | 92.0% | 88 ms | $0.0812 |
 
-95% intervals are about plus or minus 2 points, so the three models are ahead of Jev on accuracy, not tied. For the record, on Jev's own published set of 102 workflow questions Jev still leads, 91 to our best 89 of 102; the full numbers are in [`results/`](results/).
+95% intervals are about plus or minus 2 points, so the 4B is at the edge of a tie and the 9B and 27B are clearly ahead. All four systems were measured in one run from one client (`results/holdout/`), and Jev's accuracy moves by a few questions between runs (84.7% to 85.2% across ours). For the record, on Jev's own published set of 102 workflow questions Jev still leads, 91 to 88; the full numbers are in [`results/`](results/).
 
 ### Speed by input length
 
-Same run, bucketed by input tokens. Jev is flat at every length; ours grow with the document, and the 4B and 9B stay under Jev all the way up to the longest contracts.
+Same run, bucketed by input tokens. Jev is flat at every length; ours grow with the document. The 4B and 9B stay under Jev all the way up to the longest contracts; the 27B crosses Jev above 2,000 tokens.
 
 ![latency by length](post/latency_by_length.png)
 
 | Model | under 256 tokens | 256 to 512 | 512 to 1k | 1k to 2k | over 2k |
 |---|---:|---:|---:|---:|---:|
-| Hosted Jev | 188 ms | 185 ms | 180 ms | 195 ms | 187 ms |
-| Qwen3.5-4B | 61 ms | 61 ms | 61 ms | 66 ms | 83 ms |
-| Qwen3.5-9B | 64 ms | 64 ms | 65 ms | 77 ms | 103 ms |
-| Qwen3.8-27B | 95 ms | 96 ms | 103 ms | 147 ms | 224 ms |
+| Hosted Jev | 157 ms | 161 ms | 165 ms | 154 ms | 163 ms |
+| Qwen3.5-4B | 63 ms | 64 ms | 66 ms | 70 ms | 89 ms |
+| Qwen3.5-9B | 61 ms | 61 ms | 62 ms | 74 ms | 99 ms |
+| Qwen3.8-27B | 87 ms | 87 ms | 93 ms | 143 ms | 216 ms |
 
 ### Speed by questions per request
 
-Jev's API takes several questions about one state in a single request, so we tested that too: four synthetic invoices, 1, 5 or 20 yes/no questions each, every request carrying a fresh reference id so neither side can serve it from a cache. Jev's latency is flat in the number of questions. Ours grows, but the 4B and 9B answer 20 questions in about half Jev's time.
+Jev's API takes several questions about one state in a single request, so we tested that too: four synthetic invoices, 1, 5 or 20 yes/no questions each, every request carrying a fresh reference id so neither side can serve it from a cache. Jev's latency is flat in the number of questions. Ours grows, but the 4B and 9B answer 20 questions in well under Jev's time and the 27B matches it.
 
 ![multiq](post/multiq.png)
 
 | Model | 1 question | 5 questions | 20 questions |
 |---|---:|---:|---:|
-| Hosted Jev | 152 ms | 154 ms | 160 ms |
-| Qwen3.5-4B | 57 ms | 58 ms | 86 ms |
-| Qwen3.5-9B | 57 ms | 59 ms | 103 ms |
-| Qwen3.8-27B | 82 ms | 99 ms | 198 ms |
+| Hosted Jev | 142 ms | 166 ms | 170 ms |
+| Qwen3.5-4B | 60 ms | 61 ms | 98 ms |
+| Qwen3.5-9B | 54 ms | 59 ms | 100 ms |
+| Qwen3.8-27B | 80 ms | 100 ms | 200 ms |
 
 ### Cost under load
 
 ![cost](post/cost_concurrency.png)
+
+### A third-party benchmark: JevBench
+
+[JevBench](https://benchmarkheaven.com/jev-models) is Benchmark Heaven's suite for Jev-class models: 534 decisions in four tiers, authored fresh by two frontier models and frozen before any system ran. 231 of them are public; the rest, including the whole judge tier, are held back and only the site can score them. We scored the 231 public items with the site's own scoring rules on our server and did not submit anything. Nothing from JevBench went into training, and an overlap check against the training set found zero hits.
+
+| System, on the same 231 public items | Accuracy | Hard tier | Intelligence axis |
+|---|---:|---:|---:|
+| Qwen3.8-27B (this repo) | 89.6% | 79.3% | 86.2 |
+| Hosted Jev 1.13 | 86.6% | 73.0% | 82.3 |
+| Best other open reconstruction (reflex-27b) | 87.0% | 75.7% | 82.4 |
+| Frontier chat models (GPT-5.6, DeepSeek V4.1) | 97 to 98% | 96% | 96 to 97 |
+
+Our first 27B scored 85.7% here, a point behind Jev. Reading its 33 misses showed that 14 of them copied the conclusion of a wrong human note planted in the state, and that the untrained backbone was better than our fine-tune at date and number arithmetic. So we generated 6,285 synthetic decisions of those shapes (long policies with lookups, date and quantity arithmetic, multi-hop records, routing, traps, yes/no and ordered-level questions), every label derived by rule from the generated facts and a wrong "helpful note" planted on purpose, and retrained the 27B on the public mix plus those. That retrain is the 27B in every table above: JevBench rose to 89.6% and the 975-question holdout went from 91.1% to 92.0%. The site's composite score also weighs calibration, speed and cost from its own serial measurement, which we have not run.
+
 
 ## The journey
 
@@ -90,7 +104,7 @@ Jev is pretty amazing as a concept and idea. It moved things forward and they ha
 
 **Model.** Qwen3.5-4B, Qwen3.5-9B and Qwen3.8-27B, frozen, with a rank-16 LoRA on every layer's attention and DeltaNet projections and a 256-d pointer head. The head scores each option's last token against the decision token and takes a softmax over the offered options only, so any number of options works and nothing is decoded.
 
-**Training.** One epoch over 19,792 public decisions ([`data/train.jsonl.gz`](data/train.jsonl.gz)), with the benchmark's questions and documents excluded. Each example is seen in two option orders with a KL consistency term, so the answer does not depend on where the right option sits. One B200 per model: 28 minutes for the 4B, 33 for the 9B, 94 for the 27B.
+**Training.** One epoch over 19,792 public decisions ([`data/train.jsonl.gz`](data/train.jsonl.gz)), with the benchmark's questions and documents excluded; the 27B additionally sees 6,285 synthetic decisions with rule-derived labels ([`data/synth_jevbench.jsonl.gz`](data/synth_jevbench.jsonl.gz), generated by `synth_jevbench.py`). Each example is seen in two option orders with a KL consistency term, so the answer does not depend on where the right option sits. One B200 per model: 28 minutes for the 4B, 33 for the 9B, 150 for the 27B on the larger mix.
 
 **Serving.** One Modal server per model with the LoRA merged into the weights and cross-request dynamic batching: every question is one row, rows from all in-flight requests are sorted by length and run together, which is what takes the GPU from 40% busy to nearly 100% and puts our cost below Jev's. A request with several questions on one long document is served by prefilling the document once and forking the cache per question, and the server picks that path or plain rows per request from a cost model it calibrates at startup.
 

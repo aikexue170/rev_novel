@@ -276,9 +276,11 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
   if n<SHARED_MIN_QUESTIONS or prefix_tokens<SHARED_MIN_PREFIX:return False
   # Forking a long prefix into many branches crashed the fla DeltaNet kernels with an illegal memory access (ToolRet: 28
   # questions on a ~1.6k-token state, ~46k forked tokens). Above this size the rows path is used; it handles those fine.
-  if n*prefix_tokens>SHARED_MAX_FORK_TOKENS or sum(seq_lens)>SHARED_MAX_FORK_TOKENS:return False   # also long questions on a short state (ToolRet apigen_query_16: 28 questions, ~46k tokens)
+  # The branch pass pads every question to the longest one, so its real size is n x the longest row. Above the cap it
+  # crashed the fla kernels (ToolRet apigen_query_162) or returned NaN (apigen_query_156: 32 rows, one of ~9k tokens).
+  if n*max(seq_lens)>SHARED_MAX_FORK_TOKENS:return False
   rows_ms=calib['fixed_ms']+sum(((l+15)//16)*16 for l in seq_lens)*calib['ms_per_token']
-  shared_ms=2*calib['fixed_ms']+(prefix_tokens+sum(l-prefix_tokens for l in seq_lens))*calib['ms_per_token']+n*(calib['fork_ms_per_branch']+prefix_tokens*calib['fork_ms_per_branch_token'])
+  shared_ms=2*calib['fixed_ms']+(prefix_tokens+n*(max(seq_lens)-prefix_tokens))*calib['ms_per_token']   # branches are padded to the longest+n*(calib['fork_ms_per_branch']+prefix_tokens*calib['fork_ms_per_branch_token'])
   return shared_ms<rows_ms
  # Host diagnostics: one-in-flight latency on an eager model is launch-bound, so a slow host CPU shows up directly.
  import subprocess as _sp

@@ -162,6 +162,7 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
      for it,p in zip(sub,probs):it['loop'].call_soon_threadsafe(it['future'].set_result,dict(probs=p,gpu_seconds=dt,batch_rows=len(sub),batch_padded_tokens=padded,queued_seconds=t0-it['t_enqueue']))
     except Exception as e:
      for it in sub:it['loop'].call_soon_threadsafe(it['future'].set_exception,RuntimeError(repr(e)))
+     _fatal(e)
  # Warm every canonical batch size before accepting traffic (Triton autotune is keyed on batch size; new lengths
  # for a seen batch size cost only a small specialization compile).
  CANON=list(range(1,17))+[20,24,28,32,40,48,56,64,80,96,112,128];warm_start=time.perf_counter();_base=tok.encode('The quick brown fox jumps over the lazy dog. '*400,add_special_tokens=False);assert len(_base)>=3072
@@ -218,6 +219,11 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
   agree=sum(max(range(len(pa)),key=lambda j:pa[j])==max(range(len(pb)),key=lambda j:pb[j]) for pa,pb in zip(a,b))
   return dict(rows=len(rows),lengths=[len(r[0]) for r in rows],max_abs_prob_diff=max(diffs),mean_abs_prob_diff=sum(diffs)/len(diffs),choice_agreement=agree/len(rows))
  shared_lock=threading.Lock()
+ def _fatal(e):
+  """A CUDA illegal-address error is sticky: every later GPU call in this process fails. Exit so Modal replaces the
+  container instead of letting it fail every request routed to it."""
+  if 'CUDA error' in repr(e) or 'AcceleratorError' in type(e).__name__:
+   print('FATAL CUDA error, exiting so the container is replaced:',repr(e)[:300],flush=True);os._exit(1)
  def state_prefix_len(state):
   st=state if (state_format=='raw' and isinstance(state,str)) else json.dumps(state,separators=(',',':'))
   return len(tok.encode('State:\n'+st+'\n',add_special_tokens=False))
@@ -284,7 +290,9 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
   for q in body['questions']:
    ids,positions,ks=encode(body['state'],q);seqs.append(ids);pl.append(positions);keys.append(ks)
   def _go():
-   with shared_lock:return run_shared(seqs,pl,state_prefix_len(body['state']),body.get('validate',False))
+   try:
+    with shared_lock:return run_shared(seqs,pl,state_prefix_len(body['state']),body.get('validate',False))
+   except Exception as e:_fatal(e);raise
   probs,timing,validation=await asyncio.to_thread(_go)
   answers={q['id']:{'choice':ks[max(range(len(ks)),key=lambda j:p[j])],'probabilities':dict(zip(ks,p))} for q,ks,p in zip(body['questions'],keys,probs)}
   return dict(answers=answers,server_seconds=time.perf_counter()-t0,shared=timing,validation=validation,rows=[dict(gpu_seconds=timing['gpu_ms']/1000,batch_rows=len(seqs),batch_padded_tokens=timing['computed_tokens'],queued_seconds=0.)]*len(seqs),generated_tokens=0)
@@ -298,7 +306,9 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
    if choose_shared(len(enc),sl,[len(e[0]) for e in enc]):
     seqs=[e[0] for e in enc];pl=[e[1] for e in enc];keys=[e[2] for e in enc]
     def _go():
-     with shared_lock:return run_shared(seqs,pl,sl)
+     try:
+      with shared_lock:return run_shared(seqs,pl,sl)
+     except Exception as e:_fatal(e);raise
     probs,timing,_=await asyncio.to_thread(_go)   # keep the event loop free while the GPU works
     answers={q['id']:{'choice':ks[max(range(len(ks)),key=lambda j:p[j])],'probabilities':dict(zip(ks,p))} for q,ks,p in zip(body['questions'],keys,probs)}
     return dict(answers=answers,server_seconds=time.perf_counter()-t0,path='shared',shared=timing,rows=[dict(gpu_seconds=timing['gpu_ms']/1000,batch_rows=len(seqs),batch_padded_tokens=timing['computed_tokens'],queued_seconds=0.)]*len(seqs),generated_tokens=0)

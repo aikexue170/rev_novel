@@ -27,20 +27,22 @@ Serving puts every question from every request in flight into shared GPU passes,
 
 Training took 33 minutes for the 9B, 63 for the 4B and 150 for the 27B, on one B200 each: about $30 for all three at Modal's price. The whole project, every experiment and benchmark run included, cost $438 on Modal.
 
-## What we learned along the way
+## What didn't work and what it teaches us about Jev
+Jev is an impressive piece of engineering and it's clearly flipped how developers think about coding and LLM decisions.
 
-<!-- ROB: this section is yours. The chart is ready; notes below are the facts in order, hidden from the rendered page until you write it.
+Here's a few of the ideas that didn't work:
+- **JSON on hosted models** Accuracy was fine but answers generate serially: 20 questions took 5.10 s against Jev's 0.27 s, at 15x the cost per decision.
+- **Single-token outputs per question** Accuracy fell and latency barely improved. It's clear a lot of the models we use today are leaning hard on reasoning
+- **Train a head only** Frozen Qwen with a pointer head trains in ~10 s per configuration. Tried adding a head to a single layer and a learned best of multiple layers. Best accuracy was 80% on dev but much poorer on external test sets
+- **LoRA plus head** - The architecture today. Takes < 1h to tune on the full 20k tuning set
 
-- JSON on hosted models. Accuracy was fine (160 invoice decisions: hosted Qwen 154 right, Jev 147) but answers generate serially: 20 questions took 5.10 s against Jev's 0.27 s, at 15x the cost per decision.
-- Compact outputs (integer arrays, Y/N letters, bitstrings). Accuracy fell (JSON 97.5%, arrays ~92%, letters 85-87%, bitstrings 56-66%) and latency did not improve (3.25 s JSON, 4.00 s bitstrings). Priority routing on hosted providers didn't get near Jev either.
-- First-token letter logits. No generation, no training: Qwen3.8-27B ~85% on the benchmark, Qwen3.5-9B 80%. Fast, but sensitive to option order, and packing several questions into one sequence let later ones see earlier ones.
-- Head only. Frozen Qwen3.5-4B, cached hidden states, a pointer head trains in ~10 s per configuration. Best single layer (18-20 of 32) 84.3%, final layer 80.6%, learned layer mixes no better. On Jev's own workflow questions it collapsed to 58-74 of 102.
-- LoRA plus head was the win: 87.6% and 87 of 102 on Jev's questions. But at one request in flight the 9B cost 4.1x more than Jev per answer. The model was fine; the serving was the problem.
-- Speeding it up. torch.compile with CUDA graphs cut 20-question compute from 116 ms to 67 ms but needs fixed shapes and flipped near-tied answers, so the final server runs eager. What moved cost below Jev: one row per question, batched across requests (GPU from 40% busy to ~100%), then prefilling a long document once and forking the cache per question.
-- Reading the misses. The first 27B trailed Jev on JevBench's public items. 14 of its 33 misses copied a wrong human note planted in the input, and the untrained model was better at date arithmetic than our fine-tune. 6,285 synthetic decisions of those shapes, labels computed by rule, fixed most of it.
--->
+### Reverse engineering Jev
+Question and token scaling- This architecture scaled well from 1, 5, 20 questions but hosted Jev is impressively flat. 
+![multiq](post/multiq.png)
 
-![what we tried](post/what_we_tried.svg)
+Same with input length. Our method gets slower
+![latency by length](post/latency_by_length.png)
+
 
 ## Honestly
 
@@ -145,16 +147,14 @@ Modal is close to the cheapest B200 we could find. At $5.98 an hour on RunPod, t
 
 ### Outside leaderboards
 
-From our own testing, the 27B is the top open model on both public Jev leaderboards. It's ahead of Jev on JevBench and still behind it on the Decision Index.
+From our own testing, the 27B is the top open model on both public Jev leaderboards: ahead of Jev on JevBench, still behind it on the Decision Index.
 
 | Our run of | Qwen3.8-27B | Hosted Jev | Best other open model |
 |---|---:|---:|---:|
 | [JevBench](https://benchmarkheaven.com/jev-models), 231 public items | 89.6% | 86.6% | 87.0% |
 | [Decision Index](https://huggingface.co/spaces/multimodalart/jev-decision-index), 1,046-request sample | 61.1 | 63.2 | 59.2 |
 
-These are our measurements, not the boards'. We've asked JevBench to run the full suite ([#52](https://github.com/fstandhartinger/jevbench/issues/52)). No JevBench item was trained on, but we did read the first model's misses on its public items to decide what synthetic data to make, so expect its hidden items to score lower. Details in [`results/benchmarkheaven/`](results/benchmarkheaven/) and [`results/decision_index/`](results/decision_index/).
-
-Jev still wins on its own 102 published workflow questions: 91 to our 88.
+These are our measurements, not the boards'; we've asked JevBench to run the full suite ([#52](https://github.com/fstandhartinger/jevbench/issues/52)). No JevBench item was trained on, but we read our first model's misses on its public items to decide what synthetic data to make. Details in [`results/`](results/).
 
 ### Credit: Kev
 

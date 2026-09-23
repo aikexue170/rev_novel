@@ -11,7 +11,7 @@ Owner key: **C** = Claude does it, **R** = Rob does it, **C→R** = Claude prepa
 ## Weights on Hugging Face
 - [x] **C** `publish_weights.py`: packages LoRA adapters + pointer head + temperature + metadata from the Modal volume into a Hugging Face repo per model, with a model card.
 - [x] **C** `serve_local.py`: plain FastAPI server (no Modal) that loads the base model from the Hub and our checkpoint, exposes `/score` with the same contract; this is what the JevBench maintainer runs.
-- [ ] **R** Create the Hugging Face repos (or org) and run `publish_weights.py` with your token (`HF_TOKEN`); Claude cannot log in for you.
+- [~] **C** Weights uploaded as private repos: `robbalian/rev-qwen3.8-27b` (with T=1.70), `robbalian/rev-qwen3.5-9b`; the 4B follows its retrain. **R** flips them public with the repo.
 
 ## Repo public
 - [x] **C** `LICENSE` (MIT, your name), README pass for public readers (Run it section added).
@@ -19,9 +19,9 @@ Owner key: **C** = Claude does it, **R** = Rob does it, **C→R** = Claude prepa
 - [ ] **R** Flip `robbalian/rev` to public.
 
 ## JevBench submission
-- [ ] **C** Adapter for their harness (`jevbench/adapters/`) mapping our `/score` to protocol `jevbench::v1.2`, tested against the public items.
-- [ ] **C** Cost basis document: Modal list-price cost at measured throughput, plus a hosted-provider estimate for the size class.
-- [ ] **C→R** Issue text for `fstandhartinger/jevbench` requesting evaluation (links to repo, weights, adapter, cost basis). Claude posts it once the repo and weights are public.
+- [x] **C** Adapter for their harness (`jevbench_adapter/rev_http.py` + registration patch + tests), verified through their own runner: 208/231 live (one near-even item flips run to run).
+- [x] **C** Cost basis: `jevbench_adapter/COST_BASIS.md` (Modal list price at measured throughput; hosted-tariff estimate at 604 tokens/decision).
+- [~] **C→R** Issue text drafted at `jevbench_adapter/ISSUE.md` (TODOs: commit hash, weight revisions, 4B numbers). Claude posts it once the repo and weights are public.
 - [ ] **C→R** Adapter PR from a fork (after the issue).
 
 ## Decision Index (the Hugging Face Space leaderboard)

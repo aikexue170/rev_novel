@@ -19,7 +19,7 @@ answer does not depend on where the right option sits.
 
 **Links.**
 - Repo (MIT code): https://github.com/robbalian/rev — commit `TODO`
-- Weights (Apache-2.0, merged LoRA + head; base Qwen weights Apache-2.0):
+- Weights (MIT for the LoRA + head checkpoint; the base Qwen weights it merges into are Apache-2.0):
   `robbalian/rev-qwen3.5-4b` revision `TODO`, `robbalian/rev-qwen3.8-27b` revision `TODO`
   (base `Qwen/Qwen3.5-4B`; `Qwen/Qwen3.8-27B` at `1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0`)
 - Adapter and registration patch: `jevbench_adapter/` (`rev_http.py`, `jevbench-registration.patch`,

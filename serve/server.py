@@ -334,7 +334,7 @@ class Small9h:
 class Dense27b:
  @modal.enter()
  def start(self):serve('Qwen/Qwen3.8-27B',CHECKPOINTS['27b'],max_padded_tokens=32768)
-@app.server(image=blackwell_image,gpu='B200',compute_region='us-west',**COMMON)
+@app.server(image=blackwell_image,gpu='B200',compute_region='us-west',**{**COMMON,'max_containers':4})   # up to 4 GPUs for full-suite benchmark runs
 class Dense27jb:
  @modal.enter()
  def start(self):serve('Qwen/Qwen3.8-27B',CHECKPOINTS['27b_jb'],max_padded_tokens=32768)
@@ -353,7 +353,7 @@ class Small4h:
 class Small4b:
  @modal.enter()
  def start(self):serve('Qwen/Qwen3.5-4B',CHECKPOINTS['4b'])
-@app.server(image=blackwell_image,gpu='B200',compute_region='us-west',**COMMON)
+@app.server(image=blackwell_image,gpu='B200',compute_region='us-west',**{**COMMON,'max_containers':4})   # up to 4 GPUs for full-suite benchmark runs
 class Small4jb:
  @modal.enter()
  def start(self):serve('Qwen/Qwen3.5-4B',CHECKPOINTS['4b_jb'])

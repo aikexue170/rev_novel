@@ -71,7 +71,7 @@ def rev_criteria(task):
 
 
 def rev_prompt(state, instructions, criteria) -> str:
-    """The exact text the server tokenizes (server.py `encode`), for token counting only."""
+    """The exact text the server tokenizes (serve/server.py `encode`), for token counting only."""
     s = state if isinstance(state, str) else json.dumps(state, separators=(",", ":"))
     text = "State:\n" + s + "\nQuestion: " + instructions + "\nOptions:\n"
     for k, desc in criteria.items():

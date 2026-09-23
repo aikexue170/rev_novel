@@ -134,5 +134,5 @@ run is bounded by your GPU: on the sample, requests took 0.05-0.5 s of GPU time 
   frozen release per benchmark via the kit's `hub/manifest.json` hashes): Decision Index **61.07** (95% case
   bootstrap 56.7-65.0) for the 27B; Jev recomputed on the same 18 benchmarks from the Space's published values:
   **63.15**. BRIGHT was not run. Details: `results/decision_index/summary.json` in the Rev repo.
-- Not verified: `RevLocalEngine` (no local GPU here; `serve_local.py` is the same code path as `server.py`),
+- Not verified: `RevLocalEngine` (no local GPU here; `serve_local.py` is the same code path as `serve/server.py`),
   the 4B on the index, the Hub weight repos (ids assumed), and the maintainer's private leaderboard build.

@@ -34,15 +34,15 @@ generated here; nothing is copied from the benchmark items or the frozen eval se
 zero exact or 120-character-prefix overlap of states, instructions and option descriptions with them.
 
 usage:
-  synth_jevbench.py OUT_DIR [--n 500] [--seed 7] [--families long_policy,temporal_numeric,...]
-  synth_jevbench.py OUT_DIR --check          # overlap check + per-family label balance of rows in OUT_DIR
+  train/synth_jevbench.py OUT_DIR [--n 500] [--seed 7] [--families long_policy,temporal_numeric,...]
+  train/synth_jevbench.py OUT_DIR --check          # overlap check + per-family label balance of rows in OUT_DIR
 writes OUT_DIR/train.jsonl and OUT_DIR/dev.jsonl (10% of groups) in the training row format
 {id, group, source, state, instructions, criteria, expected, upstream_split}, plus summary.json.
 """
 import sys, json, random, hashlib, datetime, collections, argparse, math, calendar, re
 from pathlib import Path
 
-REV = Path(__file__).resolve().parent
+REV = Path(__file__).resolve().parents[1]   # repo root (this file lives in train/)
 BENCH_ITEMS = REV / 'results' / 'benchmarkheaven' / 'jevbench_public_231.jsonl'
 EVAL_GLOB = 'eval_sets/*.jsonl'
 

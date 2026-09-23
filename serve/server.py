@@ -71,7 +71,7 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
  h=backbone.config.hidden_size
  headq=torch.nn.Linear(h,256,bias=False,device='cuda',dtype=torch.float32);headk=torch.nn.Linear(h,256,bias=False,device='cuda',dtype=torch.float32)
  headq.load_state_dict(checkpoint['headq']);headk.load_state_dict(checkpoint['headk'])
- state_format=checkpoint['metadata'].get('state_format','json');temperature=float(checkpoint['metadata'].get('temperature',1.0))   # calibration: scores/T before the softmax (set_temperature.py)
+ state_format=checkpoint['metadata'].get('state_format','json');temperature=float(checkpoint['metadata'].get('temperature',1.0))   # calibration: scores/T before the softmax (train/set_temperature.py)
  # Optimized causal_conv1d kernel (the image builds it for this GPU family); verify it runs.
  import causal_conv1d,importlib
  model_module=importlib.import_module('transformers.models.qwen3_5.modeling_qwen3_5')

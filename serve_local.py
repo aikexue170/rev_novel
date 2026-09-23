@@ -7,13 +7,13 @@
 Options: --base (default: the checkpoint's metadata['model']), --revision (default: metadata['revision'], else the
 MODELS table below), --port 8000, --dtype bf16|fp16|fp32, --device cuda|cpu, --host 127.0.0.1.
 
-Endpoints (same contract as server.py):
+Endpoints (same contract as serve/server.py):
   POST /score   {"state": <json or string>, "questions": [{"id": ..., "instructions": ..., "criteria": {key: desc}}]}
                 -> {"answers": {id: {"choice": key, "probabilities": {key: p}}}, "server_seconds": float, ...}
   POST /ping    -> metadata (model, revision, checkpoint sha256, temperature, device, ...)
   GET  /health  -> {"ok": true}
 
-All questions of one request go into one padded forward (right padding, no attention mask, as in server.py's
+All questions of one request go into one padded forward (right padding, no attention mask, as in serve/server.py's
 run_rows). Requests are served one at a time; there is no cross-request batching here.
 
 Requirements (the Modal image pins torch==2.14.0 and transformers==5.17.0; newer versions should also work):
@@ -25,10 +25,10 @@ A GPU with room for the base model in bf16 is needed for the 9B and 27B; the 4B 
 import argparse,hashlib,json,os,sys,threading,time
 from pathlib import Path
 # fla wraps its chunked gated-delta-rule op in torch.compile(fullgraph=True); with variable batch/length shapes that
-# recompiles for seconds on every new shape (see server.py). Must be set before fla is imported.
+# recompiles for seconds on every new shape (see serve/server.py). Must be set before fla is imported.
 os.environ.setdefault('FLA_USE_COMPILE','0')
 
-# Pinned base-model revisions, copied from server.py. Used only when the checkpoint metadata carries no revision.
+# Pinned base-model revisions, copied from serve/server.py. Used only when the checkpoint metadata carries no revision.
 MODELS={'Qwen/Qwen3.8-27B':'1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0','Qwen/Qwen3.5-9B':'c202236235762e1c871ad0ccb60c8ee5ba337b9a','Qwen/Qwen3.5-4B':'851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a','Qwen/Qwen3.5-2B':'15852e8c16360a2fea060d615a32b45270f8a8fc'}
 DTYPES={'bf16':'bfloat16','fp16':'float16','fp32':'float32'}
 LORA_TARGETS={'q_proj','k_proj','v_proj','o_proj','in_proj_qkv','in_proj_z','in_proj_a','in_proj_b','out_proj'}
@@ -112,7 +112,7 @@ class Scorer:
   self.device=next(backbone.parameters()).device;self.pad_id=tok.pad_token_id or 0
   self.state_format=info['state_format'];self.temperature=info['temperature'];self.lock=threading.Lock()
  def encode(self,state,q):
-  """Prompt layout from server.py: State / Question / Options (one 'key: desc' line each) / Decision:."""
+  """Prompt layout from serve/server.py: State / Question / Options (one 'key: desc' line each) / Decision:."""
   s=state if (self.state_format=='raw' and isinstance(state,str)) else json.dumps(state,separators=(',',':'))
   ids=self.tok.encode('State:\n'+s+'\nQuestion: '+q['instructions']+'\nOptions:\n',add_special_tokens=False);positions=[];keys=[]
   for k,desc in q['criteria'].items():

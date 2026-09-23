@@ -1,7 +1,7 @@
 """Snake arena, vision edition: the board is sent as a PNG; the text carries only rules, grid size, direction and length.
 
-Players are the vision servers (vision_server.py). Same engine and seeds as snake_arena.py so scores are comparable.
-usage: snake_vision.py '[{"name":"vis27b","url":"https://..."}]' [games=10] [grid=10] [max_steps=200]
+Players are the vision servers (serve/vision_server.py). Same engine and seeds as snake/snake_arena.py so scores are comparable.
+usage: snake/snake_vision.py '[{"name":"vis27b","url":"https://..."}]' [games=10] [grid=10] [max_steps=200]
 """
 import modal,json,sys,datetime,random
 from pathlib import Path
@@ -100,6 +100,6 @@ def play(arms,games,grid,max_steps,runid):
  (out/'status.json').write_text(json.dumps({'status':'complete'}));vol.commit();return res
 if __name__=='__main__':
  arms=json.loads(sys.argv[1]);games=int(sys.argv[2]) if len(sys.argv)>2 else 10;grid=int(sys.argv[3]) if len(sys.argv)>3 else 10;max_steps=int(sys.argv[4]) if len(sys.argv)>4 else 200
- here=Path(__file__).resolve().parent;out=here/('snakevis3q_'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir();(out/'snake_vision.py').write_text(Path(__file__).read_text())
+ ROOT=Path(__file__).resolve().parents[1];out=ROOT/'runs'/('snakevis3q_'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir(parents=True);(out/'snake_vision.py').write_text(Path(__file__).read_text())
  with app.run(detach=True):
   call=play.spawn(arms,games,grid,max_steps,out.name);(out/'job.json').write_text(json.dumps(dict(app_id=app.app_id,call_id=call.object_id,arms=arms,games=games,grid=grid,max_steps=max_steps),indent=2));print(out.name,app.app_id)

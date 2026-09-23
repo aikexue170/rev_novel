@@ -5,9 +5,9 @@ log-likelihood of the expected labels when the returned probabilities are re-tem
 dividing the head's scores by T, which is what the servers do with metadata['temperature']). Prints NLL and
 expected calibration error at T=1 and at the best T. Choices never change.
 
-usage: fit_temperature.py <server_url> <dev.jsonl> [concurrency=4]
+usage: train/fit_temperature.py <server_url> <dev.jsonl> [concurrency=4]
 Rows: {state, instructions, criteria, expected}. Use a set the checkpoint was not trained on (e.g. the synthetic
-dev split written by synth_jevbench.py, or a slice of eval_sets/ that is not otherwise reported).
+dev split written by train/synth_jevbench.py, or a slice of eval_sets/ that is not otherwise reported).
 """
 import sys,json,math,time,requests,concurrent.futures
 URL=sys.argv[1].rstrip('/');rows=[json.loads(l) for l in open(sys.argv[2])];conc=int(sys.argv[3]) if len(sys.argv)>3 else 4

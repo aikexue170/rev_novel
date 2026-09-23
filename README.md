@@ -1,6 +1,10 @@
 # Rev: Beating Jev on accuracy, speed, and cost
+[human-written]
+Rev is a set of 3 decision models based off Qwen which beat Jev across multiple public benchmarks on speed, cost, and accuracy.
 
-Rev is a set of open-weight decision models: a Qwen backbone with a rank-16 LoRA and a small pointer head that picks one of the offered options without generating a token. On a 975-question public benchmark, Qwen3.5-4B and Qwen3.5-9B are more accurate than Hosted Jev, answer in about a quarter of the time end to end, and cost 1.2x to 1.7x less per answer at load; Qwen3.8-27B is 7 points more accurate and still faster. One person and two coding agents built this in about three days.
+The models, training data, and train scripts are available here.
+
+![holdout](post/hero_holdout.png)
 
 ## The benchmark
 
@@ -19,8 +23,6 @@ Rev is a set of open-weight decision models: a Qwen backbone with a rank-16 LoRA
 So the set spans two-line situations to 3,600-token contracts, yes/no to four-way choices, and three kinds of reasoning. The multi-question test further down uses a separate set of four synthetic invoices with 20 yes/no questions each.
 
 ### Accuracy, speed, cost
-
-![holdout](post/hero_holdout.png)
 
 | Model | Accuracy | Speed (end to end) | Cost per 1k |
 |---|---:|---:|---:|
@@ -60,6 +62,8 @@ Jev's API takes several questions about one state in a single request, so we tes
 ### Cost under load
 
 ![cost](post/cost_concurrency.png)
+
+Our costs are at Modal's list price ($7.39 an hour for a B200 with its CPU and RAM). At the cheapest on-demand B200 we found elsewhere, $5.98 an hour on RunPod, the 4B is $0.0178 per 1,000 answers, half of Jev's price, and the 27B is $0.0662. All providers compared: [`results/holdout/GPU_PRICES.md`](results/holdout/GPU_PRICES.md).
 
 ### A third-party benchmark: JevBench
 

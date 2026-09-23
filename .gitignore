@@ -3,3 +3,4 @@ __pycache__/
 *_20[0-9][0-9][0-9][0-9][0-9][0-9]-[0-9]*/
 !results/**
 results/decision_index/items.jsonl
+/runs/

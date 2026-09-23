@@ -72,10 +72,10 @@ def run(arms,cases,runid):
    with lock:(out/'status.json').write_text(json.dumps(status));vol.commit()
  return {p.name:p.read_text() for p in out.iterdir() if p.is_file()}
 if __name__=='__main__':
- here=Path(__file__).resolve().parent
+ ROOT=Path(__file__).resolve().parents[1]
  arms=json.loads(sys.argv[1]);label=sys.argv[2] if len(sys.argv)>2 else 'load'
- out=here/(label+'_'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir()
- source=here/'eval_sets/public_holdout_975.jsonl';raw=source.read_bytes();rows=[json.loads(l) for l in raw.splitlines()];assert len(rows)==975
+ out=ROOT/'runs'/(label+'_'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir(parents=True)
+ source=ROOT/'eval_sets/public_holdout_975.jsonl';raw=source.read_bytes();rows=[json.loads(l) for l in raw.splitlines()];assert len(rows)==975
  cases=[{'id':r['id'],'state':r['state'],'question':{'instructions':r['instructions'],'criteria':r['criteria'],'expected':r['expected'],'source':r['source'],'group':r['group']}} for r in rows]
  (out/'manifest.json').write_text(json.dumps({'holdout_sha256':hashlib.sha256(raw).hexdigest(),'rows':975,'arms':arms},indent=2));(out/'loadtest.py').write_text(Path(__file__).read_text())
  with app.run(detach=True):

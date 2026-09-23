@@ -1,4 +1,8 @@
-"""Full public-data LoRA + pointer-head training for a size ladder of Qwen3.5 dense models.
+"""Workflow adaptation: warm-start the full-data LoRA + head checkpoint and train one epoch on synthetic workflow
+decisions (security / payables / customer service / agent trace, templated, from decision_training/data_v2) plus a replay
+sample of the public mix. Jev's official questions are evaluation-only and asserted disjoint.
+
+Original docstring: Full public-data LoRA + pointer-head training for a size ladder of Qwen3.5 dense models.
 
 Recipe is the proven dense-pilot recipe (rank-16 LoRA on attention/DeltaNet projections, 256-d pointer head,
 paired option orders with KL consistency, one epoch, cosine LR). Data is the full 19,792-decision public mix
@@ -7,9 +11,10 @@ paired option orders with KL consistency, one epoch, cosine LR). Data is the ful
 import sys,os,json,datetime
 from pathlib import Path
 import modal
+ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'serve'))   # modal_image.py lives in serve/
 from modal_image import blackwell_image as image
 cache=modal.Volume.from_name('jev-model-cache')
-app=modal.App('jev-beat-train')
+app=modal.App('jev-beat-train-synth')
 runs=modal.Volume.from_name('jev-decision-training',create_if_missing=True)
 MODELS={'2b':('Qwen/Qwen3.5-2B','15852e8c16360a2fea060d615a32b45270f8a8fc'),'4b':('Qwen/Qwen3.5-4B','851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a'),'9b':('Qwen/Qwen3.5-9B','c202236235762e1c871ad0ccb60c8ee5ba337b9a'),'27b':('Qwen/Qwen3.8-27B','1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0')}
 @app.function(image=image,gpu='B200',cpu=8,memory=98304,timeout=6*3600,volumes={'/cache':cache,'/runs':runs})
@@ -43,11 +48,15 @@ def train(payload,runid,model_key):
     parent,_,attr=path.rpartition('.');a=LoRA(module);setattr(backbone.get_submodule(parent),attr,a);adapters[path]=a
   h=backbone.config.hidden_size
   headq=torch.nn.Linear(h,256,bias=False,device='cuda');headk=torch.nn.Linear(h,256,bias=False,device='cuda')
+  init=torch.load('/runs/'+payload['manifest']['initial_checkpoint'][model_key]+'/checkpoint.pt',map_location='cpu',weights_only=False)
+  assert set(init['adapters'])==set(adapters) and init['metadata']['model']==name
+  for path,a in adapters.items():a.a.data.copy_(init['adapters'][path]['a'].to('cuda'));a.b.data.copy_(init['adapters'][path]['b'].to('cuda'))
+  headq.load_state_dict(init['headq']);headk.load_state_dict(init['headk'])
   backbone.gradient_checkpointing_enable(gradient_checkpointing_kwargs={'use_reentrant':False})
   backbone.config.use_cache=False
   ap=[p for a in adapters.values() for p in [a.a,a.b]];hp=list(headq.parameters())+list(headk.parameters());params=ap+hp
-  opt=torch.optim.AdamW([{'params':ap,'lr':1e-4},{'params':hp,'lr':5e-4}],weight_decay=.01)
-  metadata=dict(model=name,revision=revision,gpu=torch.cuda.get_device_name(),rank=16,alpha=32,trainable_parameters=sum(p.numel() for p in params),max_tokens=4096,accumulation=4,permutation_pairs=True,consistency_weight=.1,initial_checkpoint=None,optimizer_state='fresh Adam; zero-B LoRA and random pointer head',epochs=1,seed=814,adapter_lr=1e-4,head_lr=5e-4,training='uncompiled BF16 backbone; FP32 adapter and head parameters; fresh LoRA/head; frozen pretrained base',dataset='data_v3 train, <=4096 tokens',state_format='raw',layout='State:\\n{state}\\nQuestion: {instructions}\\nOptions:\\n{key}: {desc}\\n...Decision:',load_seconds=time.perf_counter()-start)
+  opt=torch.optim.AdamW([{'params':ap,'lr':3e-5},{'params':hp,'lr':1.5e-4}],weight_decay=.01)
+  metadata=dict(model=name,revision=revision,gpu=torch.cuda.get_device_name(),rank=16,alpha=32,trainable_parameters=sum(p.numel() for p in params),max_tokens=4096,accumulation=4,permutation_pairs=True,consistency_weight=.1,initial_checkpoint=payload['manifest']['initial_checkpoint'][model_key],optimizer_state='fresh Adam; adapters and head warm-started from the full-data checkpoint',epochs=1,seed=814,adapter_lr=3e-5,head_lr=1.5e-4,training='uncompiled BF16 backbone; FP32 adapter and head parameters; fresh LoRA/head; frozen pretrained base',dataset='synth_workflows (official-style packets, rule labels) + replay of data_v3 train (2000), <=4096 tokens',state_format='raw',layout='State:\\n{state}\\nQuestion: {instructions}\\nOptions:\\n{key}: {desc}\\n...Decision:',load_seconds=time.perf_counter()-start)
   save('metadata.json',metadata);log({'ready':metadata})
   def encode(r,seed=None):
    keys=list(r['criteria'])
@@ -59,7 +68,7 @@ def train(payload,runid,model_key):
     desc=r['criteria'][k];ids+=tok.encode(str(k)+': '+str(desc or k)+'\n',add_special_tokens=False);positions.append(len(ids)-1)
    ids+=tok.encode('Decision:',add_special_tokens=False)
    return dict(ids=ids,positions=positions,keys=keys,label=keys.index(r['expected']),row=r)
-  alltrain=[encode(r,814+i) for i,r in enumerate(payload['train'])];devrows=[encode(r) for r in payload['development']]
+  alltrain=[encode(r,814+i) for i,r in enumerate(payload['train'])];devrows=[encode(r) for r in payload['development']];extrows=[encode(r) for r in payload['external']];wfrows=[encode(r) for r in payload['workflow_dev']]
   trainrows=[x for x in alltrain if len(x['ids'])<=4096];dropped=[x['row']['id'] for x in alltrain if len(x['ids'])>4096]
   assert max(len(x['ids']) for x in devrows)<=4096
   save('filtering.json',{'train':{'before':len(alltrain),'kept':len(trainrows),'dropped_ids':dropped},'development':{'before':len(devrows),'kept':len(devrows),'dropped_ids':[]}})
@@ -123,12 +132,12 @@ def train(payload,runid,model_key):
   torch.nn.utils.clip_grad_norm_(params,1.,error_if_nonfinite=True)
   log({'long_context_probe':{'tokens':len(trainrows[longest]['ids']),'seconds':time.perf_counter()-clock,'loss':float(probe.detach()),'peak_gb':torch.cuda.max_memory_allocated()/2**30}})
   del probe;opt.zero_grad(set_to_none=True);gc.collect();torch.cuda.empty_cache()
-  evaluate(devrows,'baseline_development');backbone.train()
+  evaluate(extrows,'baseline_external');evaluate(wfrows,'baseline_workflow_dev');backbone.train()
   losses=[];training_start=time.perf_counter();done=0
   def checkpoint(done,tag='checkpoint'):
    weights={'adapters':{k:{'a':a.a.detach().cpu(),'b':a.b.detach().cpu()} for k,a in adapters.items()},'headq':headq.state_dict(),'headk':headk.state_dict(),'metadata':metadata,'examples':done}
    torch.save(weights,out/(tag+'.pt'));torch.save(opt.state_dict(),out/'optimizer.pt');runs.commit()
-  eval_points={4096,8192,12288,16384}
+  eval_points=set()
   for group in groups:
    length=max(len(trainrows[i]['ids']) for i in group)
    batch=4 if length<=1024 else 2 if length<=1536 else 1
@@ -151,7 +160,7 @@ def train(payload,runid,model_key):
      else:raise
      log({'oom_retry':{'done':done,'tokens':length,'microbatch':batch,'activation_offload':offload}})
    before=done;done+=len(group);losses.extend(group_losses)
-   factor=.2+.8*.5*(1+math.cos(math.pi*done/n));opt.param_groups[0]['lr']=1e-4*factor;opt.param_groups[1]['lr']=5e-4*factor
+   factor=.2+.8*.5*(1+math.cos(math.pi*done/n));opt.param_groups[0]['lr']=3e-5*factor;opt.param_groups[1]['lr']=1.5e-4*factor
    opt.step();opt.zero_grad(set_to_none=True)
    if done//128!=before//128 or done==n:
     elapsed=time.perf_counter()-training_start
@@ -161,25 +170,29 @@ def train(payload,runid,model_key):
    if crossed:
     evaluate(devrows,'development_at_'+str(crossed[0]));backbone.train()
   checkpoint(done)
-  evaluate(devrows,'trained_development')
+  evaluate(extrows,'trained_external');evaluate(wfrows,'trained_workflow_dev');evaluate(devrows,'trained_development')
   permuted=[encode(x['row'],900+i) for i,x in enumerate(devrows)]
   evaluate(permuted,'trained_development_permuted')
   save('status.json',{'status':'complete','elapsed_seconds':time.perf_counter()-start,'checkpoint':str(out/'checkpoint.pt'),'training_examples':n});return results()
  except Exception:
   save('status.json',{'status':'failed','traceback':traceback.format_exc(),'elapsed_seconds':time.perf_counter()-start});print(traceback.format_exc(),flush=True);return results()
 if __name__=='__main__':
- import shutil,hashlib
- keys=sys.argv[1:] or ['2b','4b','9b','27b']
+ import shutil,hashlib,random
+ DATA=os.environ.get('SYNTH_DATA','data_synth_v2');keys=sys.argv[1:] or ['4b','27b']
  import gzip
- here=Path(__file__).resolve().parent;tp=here/os.environ.get('TRAIN_DATA','data/train.jsonl.gz')
- train_raw=gzip.decompress(tp.read_bytes()) if tp.suffix=='.gz' else tp.read_bytes();hold_raw=(here/'eval_sets/public_holdout_975.jsonl').read_bytes()
- payload={'train':[json.loads(l) for l in train_raw.splitlines()],'development':[json.loads(l) for l in hold_raw.splitlines()]}
- assert len(payload['development'])==975 and len(payload['train'])>1000
- tid={r['id'] for r in payload['train']};tg={r['group'] for r in payload['train']}
- assert not any(r['id'] in tid or r['group'] in tg for r in payload['development'])
- payload['manifest']={'models':{k:list(v) for k,v in MODELS.items()},'max_tokens':4096,'train_sha256':hashlib.sha256(train_raw).hexdigest(),'holdout_sha256':hashlib.sha256(hold_raw).hexdigest(),'train_rows':len(payload['train']),'holdout_rows':975}
- out=here/(os.environ.get('RUN_PREFIX','full_')+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir()
- (out/'manifest.json').write_text(json.dumps(payload['manifest'],indent=2));(out/'train.py').write_text(Path(__file__).read_text())
+ here=Path(__file__).resolve().parent
+ synth_train=[json.loads(l) for l in (ROOT/DATA/'train.jsonl').read_text().splitlines()];synth_dev=[json.loads(l) for l in (ROOT/DATA/'dev.jsonl').read_text().splitlines()]
+ rnd=random.Random(2026);v3=[json.loads(l) for l in gzip.decompress((ROOT/'data/train.jsonl.gz').read_bytes()).decode().splitlines()];rnd.shuffle(v3);replay=v3[:2000]
+ hold_raw=(ROOT/'eval_sets/public_holdout_975.jsonl').read_bytes();ext_raw=(ROOT/'eval_sets/jev_official_262.jsonl').read_bytes()
+ development=[json.loads(l) for l in hold_raw.splitlines()];external=[json.loads(l) for l in ext_raw.splitlines()]
+ train_rows=synth_train+replay
+ for evalset in (development,external):
+  ids={r['id'] for r in evalset};groups={r['group'] for r in evalset};states={json.dumps(r['state'],sort_keys=True) for r in evalset}
+  assert not any(r['id'] in ids or r['group'] in groups or json.dumps(r['state'],sort_keys=True) in states for r in train_rows)
+ payload={'train':train_rows,'development':development,'external':external,'workflow_dev':synth_dev}
+ payload['manifest']={'models':{k:list(v) for k,v in MODELS.items()},'initial_checkpoint':{k:'full_20260922-091011_'+k for k in MODELS},'max_tokens':4096,'holdout_sha256':hashlib.sha256(hold_raw).hexdigest(),'external_sha256':hashlib.sha256(ext_raw).hexdigest(),'train_rows':len(train_rows),'synth_train':len(synth_train),'synth_dev':len(synth_dev),'replay':len(replay),'synth_summary':json.loads((ROOT/DATA/'summary.json').read_text())}
+ out=ROOT/'runs'/('synth_'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir(parents=True)
+ (out/'manifest.json').write_text(json.dumps(payload['manifest'],indent=2));(out/'train_synth.py').write_text(Path(__file__).read_text());shutil.copytree(ROOT/DATA,out/'data_snapshot');(out/'synth_workflows.py').write_text((here/'synth_workflows.py').read_text())
  jobs={}
  with app.run(detach=True):
   for key in keys:

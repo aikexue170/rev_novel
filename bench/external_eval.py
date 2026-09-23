@@ -1,15 +1,15 @@
 """Score the frozen external set (Jev's 102 official workflow questions + 160 public-task slice) on deployed servers,
 and compare with Jev's saved answers on the same rows.
 
-usage: external_eval.py arm=url [arm=url ...]
+usage: bench/external_eval.py arm=url [arm=url ...]
 """
 import sys,json,time,datetime,collections,concurrent.futures,requests
 from pathlib import Path
-here=Path(__file__).resolve().parent
-rows=[json.loads(l) for l in (here/'eval_sets/jev_official_262.jsonl').read_text().splitlines()]
-jev={r['id']:r for r in (json.loads(l) for l in (here/'results/jev_official_answers.jsonl').read_text().splitlines())}
+ROOT=Path(__file__).resolve().parents[1]
+rows=[json.loads(l) for l in (ROOT/'eval_sets/jev_official_262.jsonl').read_text().splitlines()]
+jev={r['id']:r for r in (json.loads(l) for l in (ROOT/'results/jev_official_answers.jsonl').read_text().splitlines())}
 assert len(rows)==262 and all(r['id'] in jev for r in rows)
-out=here/('external_'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir()
+out=ROOT/'runs'/('external_'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir(parents=True)
 OFFICIAL=lambda s:s.startswith('typesafe_')
 def score(arm,url):
  s=requests.Session()

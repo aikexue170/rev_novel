@@ -1,12 +1,12 @@
 """Score Kev's released checkpoints (jaredpalmer/kev-4b, kev-9b) on our two frozen evaluation sets, through Kev's own
 serving-format path (api.to_record -> model.encode -> model.probs), one question per request like our load tests.
 
-usage: kev_eval.py [runs...]   default: jaredpalmer/kev-4b jaredpalmer/kev-9b
+usage: bench/kev_eval.py [runs...]   default: jaredpalmer/kev-4b jaredpalmer/kev-9b
 """
 import os,sys,json,datetime
 from pathlib import Path
 import modal
-HERE=Path(__file__).resolve().parent;KEV=Path(os.environ.get('KEV_DIR',HERE.parent/'kev'))   # a checkout of github.com/jaredpalmer/kev
+ROOT=Path(__file__).resolve().parents[1];KEV=Path(os.environ.get('KEV_DIR',ROOT.parent/'kev'))   # a checkout of github.com/jaredpalmer/kev
 app=modal.App('jev-beat-kev-eval')
 cache=modal.Volume.from_name('jev-model-cache');results=modal.Volume.from_name('jev-benchmark-results')
 image=(modal.Image.debian_slim(python_version='3.12').env({'HF_HOME':'/cache/huggingface','KEV_DTYPE':'bf16','KEV_STRICT':'0'})
@@ -43,8 +43,8 @@ def run(run_name,rows,runid):
  return dict(run=run_name,rows=len(preds),errors=errors,accuracy=acc,load_seconds=load_s,gpu=torch.cuda.get_device_name())
 if __name__=='__main__':
  runs=sys.argv[1:] or ['jaredpalmer/kev-4b','jaredpalmer/kev-9b']
- rows=[json.loads(l) for l in (HERE/'eval_sets/public_holdout_975.jsonl').read_text().splitlines()]+[json.loads(l) for l in (HERE/'eval_sets/jev_official_262.jsonl').read_text().splitlines()]
- out=HERE/('kev_'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir();jobs={}
+ rows=[json.loads(l) for l in (ROOT/'eval_sets/public_holdout_975.jsonl').read_text().splitlines()]+[json.loads(l) for l in (ROOT/'eval_sets/jev_official_262.jsonl').read_text().splitlines()]
+ out=ROOT/'runs'/('kev_'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir(parents=True);jobs={}
  with app.run(detach=True):
   for r in runs:
    call=run.spawn(r,rows,out.name);jobs[r]=dict(app_id=app.app_id,call_id=call.object_id)

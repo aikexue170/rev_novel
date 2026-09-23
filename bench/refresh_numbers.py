@@ -1,14 +1,14 @@
 """Build post/numbers.json (and post/holdout_latency_by_length.json) from one load-test run and one multi-question run,
 so every number in the README charts comes from a single run with the same client and server version.
 
-usage: refresh_numbers.py <load_run_name> <multiq_summary.json> [arm=key ...]
-  load_run_name        run directory on the jev-benchmark-results volume (e.g. final8_20260923-001846), summarized by report.py
-  multiq_summary.json  summary written by report_multiq.py for the cache-busted 1/5/20 run
+usage: bench/refresh_numbers.py <load_run_name> <multiq_summary.json> [arm=key ...]
+  load_run_name        run directory on the jev-benchmark-results volume (e.g. final8_20260923-001846), summarized by bench/report.py
+  multiq_summary.json  summary written by bench/report_multiq.py for the cache-busted 1/5/20 run
   arm=key              arm name -> chart key mapping (default: jev=jev small4b=4b small9b=9b dense27jb=27b)
 Prints the README table rows as markdown.
 """
 import sys,json,pathlib,subprocess,tempfile,statistics
-PY=sys.executable;here=pathlib.Path(__file__).resolve().parent
+PY=sys.executable;ROOT=pathlib.Path(__file__).resolve().parents[1]
 run=sys.argv[1];mq=json.loads(pathlib.Path(sys.argv[2]).read_text())
 keymap=dict(a.split('=') for a in sys.argv[3:]) or {'jev':'jev','small4b':'4b','small9b':'9b','dense27jb':'27b'}
 tmp=pathlib.Path(tempfile.mkdtemp())
@@ -47,7 +47,7 @@ for r in mq['rows']:
  key=keymap.get(r['arm'])
  if key:mqn.setdefault(key,{})[str(r['size'])]=dict(p50_ms=r['p50_ms'],accuracy=r['accuracy'],gpu_ms=r.get('gpu_ms'),path=r.get('path'))
 out=dict(load_run=run,multiq_run=mq.get('metadata',{}).get('run') or sys.argv[2],hero=hero,cost_curve=curve,multiq=mqn)
-(here/'post/numbers.json').write_text(json.dumps(out,indent=1));(here/'post/holdout_latency_by_length.json').write_text(json.dumps(bl,indent=1))
+(ROOT/'post/numbers.json').write_text(json.dumps(out,indent=1));(ROOT/'post/holdout_latency_by_length.json').write_text(json.dumps(bl,indent=1))
 NAMES={'jev':'Hosted Jev','4b':'Qwen3.5-4B','9b':'Qwen3.5-9B','27b':'Qwen3.8-27B'}
 print('\n| Model | Accuracy | Speed (end to end) | Cost per 1k |\n|---|---:|---:|---:|')
 for k in ['jev','4b','9b','27b']:

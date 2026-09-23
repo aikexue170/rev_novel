@@ -1,16 +1,19 @@
 """Quick status of training runs and load tests from the Modal volumes.
 
-usage: status.py train <full_dir>        # e.g. experiments/beat/full_20260922-091011
-       status.py load <load_dir>          # e.g. experiments/beat/pilot9_20260922-091346
+usage: bench/status.py train <full_dir>        # e.g. runs/full_20260922-091011
+       bench/status.py load <load_dir>          # e.g. runs/pilot9_20260922-091346
 """
 import sys,json,subprocess,tempfile,pathlib
 PY='/tmp/jev-modal-latency-env/bin/python'
+ROOT=pathlib.Path(__file__).resolve().parents[1]
+def rundir(a):   # a run directory: as given, or by name under <repo>/runs/
+ p=pathlib.Path(a);return p if p.exists() or not (ROOT/'runs'/a).exists() else ROOT/'runs'/a
 def fetch(volume,remote):
  tmp=tempfile.mkdtemp();dest=pathlib.Path(tmp)/'f'
  r=subprocess.run([PY,'-m','modal','volume','get',volume,remote,str(dest),'--force'],capture_output=True,text=True)
  if r.returncode!=0:return None
  return dest.read_text()
-mode,d=sys.argv[1],pathlib.Path(sys.argv[2])
+mode,d=sys.argv[1],rundir(sys.argv[2])
 if mode=='train':
  jobs=json.loads((d/'jobs.json').read_text())
  for key,job in jobs.items():

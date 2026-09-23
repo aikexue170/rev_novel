@@ -7,6 +7,7 @@ depths) with cross-entropy over the offered options. Reports accuracy on the 975
 import sys,json,datetime
 from pathlib import Path
 import modal
+ROOT=Path(__file__).resolve().parents[1];sys.path.insert(0,str(ROOT/'serve'))   # modal_image.py lives in serve/
 from modal_image import blackwell_image as image
 cache=modal.Volume.from_name('jev-model-cache');runs=modal.Volume.from_name('jev-decision-training')
 app=modal.App('jev-beat-head-only')
@@ -99,9 +100,8 @@ def run(payload,runid):
  return {k:{kk:vv for kk,vv in v.items() if kk!='external_answers'} for k,v in results.items()}
 if __name__=='__main__':
  import gzip
- here=Path(__file__).resolve().parent
  payload=dict(model=('Qwen/Qwen3.5-4B','851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a'),depths=list(range(12,33)),configs=[[18],[19],{'mix':[17,18,19,20,21]},{'mix':list(range(14,25))},{'mix':list(range(12,33))},{'mix':[18,20,24,28,32]}],max_tokens=4096,batch_tokens=32768,
-  train=[json.loads(l) for l in gzip.decompress((here/'data/train.jsonl.gz').read_bytes()).decode().splitlines()],development=[json.loads(l) for l in (here/'eval_sets/public_holdout_975.jsonl').read_text().splitlines()],external=[json.loads(l) for l in (here/'eval_sets/jev_official_262.jsonl').read_text().splitlines()])
- out=here/('headmix_'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir();(out/'head_only.py').write_text(Path(__file__).read_text())
+  train=[json.loads(l) for l in gzip.decompress((ROOT/'data/train.jsonl.gz').read_bytes()).decode().splitlines()],development=[json.loads(l) for l in (ROOT/'eval_sets/public_holdout_975.jsonl').read_text().splitlines()],external=[json.loads(l) for l in (ROOT/'eval_sets/jev_official_262.jsonl').read_text().splitlines()])
+ out=ROOT/'runs'/('headmix_'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir(parents=True);(out/'head_only.py').write_text(Path(__file__).read_text())
  with app.run(detach=True):
   call=run.spawn(payload,out.name);job=dict(app_id=app.app_id,call_id=call.object_id,volume_run=out.name);(out/'job.json').write_text(json.dumps(job,indent=2));print(json.dumps(job),flush=True)

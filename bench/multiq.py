@@ -56,9 +56,9 @@ def run(arms,cases,runid,sizes,reps,cachebust=False):
    with lock:(out/'status.json').write_text(json.dumps(status));vol.commit()
  return {p.name:p.read_text() for p in out.iterdir() if p.is_file()}
 if __name__=='__main__':
- here=Path(__file__).resolve().parent;arms=json.loads(sys.argv[1]);label=sys.argv[2] if len(sys.argv)>2 else 'multiq'
- cases_file=sys.argv[3] if len(sys.argv)>3 else str(here/'cases/invoice_cases.json');sizes=json.loads(sys.argv[4]) if len(sys.argv)>4 else [1,5,20];cachebust=len(sys.argv)>5 and sys.argv[5]=='bust'
+ ROOT=Path(__file__).resolve().parents[1];arms=json.loads(sys.argv[1]);label=sys.argv[2] if len(sys.argv)>2 else 'multiq'
+ cases_file=sys.argv[3] if len(sys.argv)>3 else str(ROOT/'cases/invoice_cases.json');sizes=json.loads(sys.argv[4]) if len(sys.argv)>4 else [1,5,20];cachebust=len(sys.argv)>5 and sys.argv[5]=='bust'
  cases=json.loads(Path(cases_file).read_text());assert len(cases)>=1
- out=here/(label+'_'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir();(out/'cases.json').write_text(json.dumps(cases));(out/'multiq.py').write_text(Path(__file__).read_text())
+ out=ROOT/'runs'/(label+'_'+datetime.datetime.now().strftime('%Y%m%d-%H%M%S'));out.mkdir(parents=True);(out/'cases.json').write_text(json.dumps(cases));(out/'multiq.py').write_text(Path(__file__).read_text())
  with app.run(detach=True):
   call=run.spawn(arms,cases,out.name,sizes,5,cachebust);job=dict(app_id=app.app_id,call_id=call.object_id,output=str(out),cachebust=cachebust,sizes=sizes,cases_file=cases_file);(out/'job.json').write_text(json.dumps(job,indent=2));print(json.dumps(job),flush=True)

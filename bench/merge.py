@@ -1,7 +1,7 @@
-"""Merge load-test summaries from several runs into one directory for charts.py / the final report.
+"""Merge load-test summaries from several runs into one directory for bench/charts.py / the final report.
 
-usage: merge.py <out_dir> <load_dir>[:arm1,arm2] [<load_dir>[:arms] ...]
-Each source directory must already have summary.json (run report.py on it first). Optional ':arms' keeps only those arms.
+usage: bench/merge.py <out_dir> <load_dir>[:arm1,arm2] [<load_dir>[:arms] ...]
+Each source directory must already have summary.json (run bench/report.py on it first). Optional ':arms' keeps only those arms.
 """
 import sys,json,pathlib
 out=pathlib.Path(sys.argv[1]);out.mkdir(exist_ok=True);rows=[];meta={};sources=[]

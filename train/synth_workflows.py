@@ -5,7 +5,7 @@ conversation with account summary, security alert with context records). All ent
 generated here; nothing is copied from the evaluation set. Labels are computed from the latent facts that generate
 each packet, so they are exact by construction.
 
-usage: synth_workflows.py <out_dir> [packets_per_category=200] [seed=7]
+usage: train/synth_workflows.py <out_dir> [packets_per_category=200] [seed=7]
 writes train.jsonl / dev.jsonl (10% of packets held out by packet) in the decision_training row format.
 """
 import sys,json,random,datetime,hashlib,collections,re

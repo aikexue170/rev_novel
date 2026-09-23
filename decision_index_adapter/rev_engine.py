@@ -34,7 +34,7 @@ import time
 
 from decision_index.engines.base import Engine, Unsupported, text
 
-ROW_TOKEN_LIMIT = 16384  # MAX_ROW_TOKENS in serve_local.py and the assert in server.py
+ROW_TOKEN_LIMIT = 16384  # MAX_ROW_TOKENS in serve_local.py and the assert in serve/server.py
 CAPACITY_MARKERS = ("exceeds", "tokens exceeds", "context window", "maximum context length")
 
 

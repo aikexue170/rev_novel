@@ -1,10 +1,13 @@
 """Turn a load-test run into tables: accuracy, latency, throughput, cost per 1,000 answers at measured throughput.
 
-usage: report.py <load_dir> [<load_dir> ...]
+usage: bench/report.py <load_dir> [<load_dir> ...]
 Fetches summary.jsonl (and per-arm metadata) from the jev-benchmark-results volume, writes <load_dir>/REPORT.md and summary.json.
 """
 import sys,json,subprocess,tempfile,pathlib,collections
 PY='/tmp/jev-modal-latency-env/bin/python'
+ROOT=pathlib.Path(__file__).resolve().parents[1]
+def rundir(a):   # a run directory: as given, or by name under <repo>/runs/
+ p=pathlib.Path(a);return p if p.exists() or not (ROOT/'runs'/a).exists() else ROOT/'runs'/a
 # Modal list prices, USD per second, checked 2026-09-21 (modal.com/pricing). CPU/RAM are the provisioned 8 cores + 96 GiB.
 GPU_RATES={'H100':3.95/3600,'B200':6.25/3600,'L40S':1.95/3600,'A100-80GB':2.50/3600,'H200':4.54/3600}
 CPU_RAM=8*(0.047/3600)+96*(0.008/3600)
@@ -16,7 +19,7 @@ def gpu_key(name):
   if k.split('-')[0] in n:return k
  return None
 def load(d):
- d=pathlib.Path(d);tmp=pathlib.Path(tempfile.mkdtemp())
+ d=rundir(d);tmp=pathlib.Path(tempfile.mkdtemp())
  assert fetch('jev-benchmark-results',d.name+'/summary.jsonl',tmp/'summary.jsonl'),'no summary for '+d.name
  rows=[json.loads(l) for l in (tmp/'summary.jsonl').read_text().splitlines()]
  meta={}

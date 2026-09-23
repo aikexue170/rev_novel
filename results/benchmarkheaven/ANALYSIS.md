@@ -2,7 +2,7 @@
 
 Inputs: `jevbench_public_231.jsonl` (items in our request format), `dense27b.jsonl` (per-item results), `summary.json`
 (scores + every leaderboard system on the same 231 items), `run.py` (build/score). Nothing here is training data;
-the generator for the weak shapes is `/Users/rob/Documents/rev/synth_jevbench.py` (section 6).
+the generator for the weak shapes is `/Users/rob/Documents/rev/train/synth_jevbench.py` (section 6).
 
 ## 1. Headline
 
@@ -88,7 +88,7 @@ Ties: `run.py` picks the lexicographically smallest label among tied maxima, as 
 
 **Is the format hurting us?** Not on its own: noul 12/12 easy, 23/24 standard; score 12/12 standard. The
 `true/false → yes/no` mapping and the level-index convention are learned already (from the earlier
-`synth_workflows.py` rows, which use `true`/`false` keys, and from BoolQ/MultiRC). By type on hard: choice 48/67,
+`train/synth_workflows.py` rows, which use `true`/`false` keys, and from BoolQ/MultiRC). By type on hard: choice 48/67,
 noul 29/38, score 2/6. Hard score is bad (2/6), but all four hard score misses are off by exactly one level in the
 same direction (+1) after long counting/adjustment chains, which is arithmetic, not level-format confusion.
 
@@ -173,11 +173,11 @@ The remaining gap to the frontier models (107/111) is real capability: they get 
 long_policy with reasoning at inference. Without chain of thought we should expect to close roughly half the gap on
 the rule-derivable families and little of it on the near-boundary arithmetic.
 
-## 6. The generator: `synth_jevbench.py`
+## 6. The generator: `train/synth_jevbench.py`
 
-`python3 synth_jevbench.py OUT_DIR [--n 500] [--seed 7] [--families …]` writes `train.jsonl` / `dev.jsonl` (10% of
+`python3 train/synth_jevbench.py OUT_DIR [--n 500] [--seed 7] [--families …]` writes `train.jsonl` / `dev.jsonl` (10% of
 groups) in the training row format `{id, group, source, state, instructions, criteria, expected, upstream_split}` and
-`summary.json`. `python3 synth_jevbench.py OUT_DIR --check` asserts zero exact / 120-character-prefix / normalised-prefix
+`summary.json`. `python3 train/synth_jevbench.py OUT_DIR --check` asserts zero exact / 120-character-prefix / normalised-prefix
 overlap of states, instructions **and option descriptions** with the 231 public items and `eval_sets/*.jsonl`, and
 prints per-family label balance, question types and state lengths.
 

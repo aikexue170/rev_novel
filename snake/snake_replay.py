@@ -1,10 +1,13 @@
 """Build a self-contained HTML replay page for a Snake arena run.
 
-usage: snake_replay.py <snake_dir>   (fetches <arm>_games.json / <arm>_summary.json from the results volume)
+usage: snake/snake_replay.py <snake_dir>   (fetches <arm>_games.json / <arm>_summary.json from the results volume)
 writes <snake_dir>/summary.json, REPORT.md and replay.html (side-by-side boards, play/pause/step, per-tick choice + probabilities).
 """
 import sys,json,subprocess,tempfile,pathlib,statistics
-PY='/tmp/jev-modal-latency-env/bin/python';d=pathlib.Path(sys.argv[1]);tmp=pathlib.Path(tempfile.mkdtemp())
+PY='/tmp/jev-modal-latency-env/bin/python';ROOT=pathlib.Path(__file__).resolve().parents[1]
+def rundir(a):   # a run directory: as given, or by name under <repo>/runs/
+ p=pathlib.Path(a);return p if p.exists() or not (ROOT/'runs'/a).exists() else ROOT/'runs'/a
+d=rundir(sys.argv[1]);tmp=pathlib.Path(tempfile.mkdtemp())
 job=json.loads((d/'job.json').read_text());arms=[a['name'] for a in job['arms']];grid=job['grid']
 LABEL={'jev':'Hosted Jev','small4b':'Qwen 4B + head','small9b':'Qwen 9B + head','dense27b':'Qwen 27B + head','small2h':'Qwen 2B + head','vis4b':'Qwen 4B + head (image board)','vis9b':'Qwen 9B + head (image board)','vis27b':'Qwen 27B + head (image board)'}
 def fetch(name):

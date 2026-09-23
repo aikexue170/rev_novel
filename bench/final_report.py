@@ -1,6 +1,6 @@
 """Assemble the final comparison report from merged load results, the multiq run, and training evals.
 
-usage: final_report.py <out_dir> <merged_load_dir> <multiq_dir> <train_dir>
+usage: bench/final_report.py <out_dir> <merged_load_dir> <multiq_dir> <train_dir>
 """
 import sys,json,pathlib,math,subprocess,tempfile
 out,load,multiq,train=[pathlib.Path(a) for a in sys.argv[1:5]];out.mkdir(exist_ok=True)
@@ -47,5 +47,5 @@ for key,job in jobs.items():
   if 'examples' in d:last=d
  g=lambda k:f"{ev[k]*100:.1f}%" if k in ev else ''
  lines.append(f"| {job['model']} | {g('development_at_4096')} | {g('development_at_8192')} | {g('development_at_12288')} | {g('development_at_16384')} | **{g('trained_development')}** | {g('trained_development_permuted')} | {last['elapsed_seconds']/60:.0f} min |" if last else f"| {job['model']} | | | | | | | |")
-lines+=['','## Serving notes','','- Right padding on a causal model needs no attention mask for the positions read; masked vs unmasked outputs were identical on 40 mixed-length rows (`/parity`).','- Triton autotunes fla\'s DeltaNet kernels per (batch, length) key, ~8 s each; the server reuses the first tuned config per kernel for new keys and pre-warms a fixed set of batch sizes (`server.py`).','- Length-sorted, marginal-cost sub-batching (16-token rounding). Padding + per-forward overhead still cost ~20–30% versus the 52k tokens/s (B200) / 30k tokens/s (H100) forward ceiling; sequence packing would recover most of that.','- Cost excludes startup (~40–120 s), idle time, and any provider margin; it is the operating cost of a saturated GPU at Modal list price, checked 2026-09-22.','']
+lines+=['','## Serving notes','','- Right padding on a causal model needs no attention mask for the positions read; masked vs unmasked outputs were identical on 40 mixed-length rows (`/parity`).','- Triton autotunes fla\'s DeltaNet kernels per (batch, length) key, ~8 s each; the server reuses the first tuned config per kernel for new keys and pre-warms a fixed set of batch sizes (`serve/server.py`).','- Length-sorted, marginal-cost sub-batching (16-token rounding). Padding + per-forward overhead still cost ~20–30% versus the 52k tokens/s (B200) / 30k tokens/s (H100) forward ceiling; sequence packing would recover most of that.','- Cost excludes startup (~40–120 s), idle time, and any provider margin; it is the operating cost of a saturated GPU at Modal list price, checked 2026-09-22.','']
 (out/'REPORT.md').write_text('\n'.join(lines)+'\n');(out/'headline.json').write_text(json.dumps(best,indent=2));print('\n'.join(lines[:14]))

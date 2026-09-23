@@ -1,12 +1,15 @@
 """Summarize a multiq run: per arm and questions-per-request, median/p95 e2e, GPU time, accuracy, cost.
 
-usage: report_multiq.py <multiq_dir>   -> writes <dir>/summary.json and REPORT.md
+usage: bench/report_multiq.py <multiq_dir>   -> writes <dir>/summary.json and REPORT.md
 """
 import sys,json,subprocess,tempfile,pathlib,statistics,collections
 PY='/tmp/jev-modal-latency-env/bin/python'
+ROOT=pathlib.Path(__file__).resolve().parents[1]
+def rundir(a):   # a run directory: as given, or by name under <repo>/runs/
+ p=pathlib.Path(a);return p if p.exists() or not (ROOT/'runs'/a).exists() else ROOT/'runs'/a
 def fetch(remote,dest):
  return subprocess.run([PY,'-m','modal','volume','get','jev-benchmark-results',remote,str(dest),'--force'],capture_output=True,text=True).returncode==0
-d=pathlib.Path(sys.argv[1]);tmp=pathlib.Path(tempfile.mkdtemp())
+d=rundir(sys.argv[1]);tmp=pathlib.Path(tempfile.mkdtemp())
 r=subprocess.run([PY,'-m','modal','volume','ls','jev-benchmark-results',d.name],capture_output=True,text=True);arms=sorted({l.split('/')[-1].split('_')[0].replace('.jsonl','') for l in r.stdout.split() if l.endswith('.jsonl') and not l.endswith('_warmup.jsonl') and not l.endswith('_metadata.jsonl')})
 rows=[];meta={}
 for arm in arms:

@@ -1,11 +1,12 @@
 """Charts for REV.md (the post). Numbers are the published ones from final/REPORT.md and the cache-busted multiq runs.
 
-usage: post_charts.py [out_dir=post]   -> hero_holdout.png, latency_by_length.png, multiq.png, cost_concurrency.png, journey.png
+usage: bench/post_charts.py [out_dir=<repo>/post]   -> hero_holdout.png, latency_by_length.png, multiq.png, cost_concurrency.png, journey.png
 """
 import sys,pathlib
 import matplotlib;matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-out=pathlib.Path(sys.argv[1] if len(sys.argv)>1 else 'post');out.mkdir(exist_ok=True)
+ROOT=pathlib.Path(__file__).resolve().parents[1]
+out=pathlib.Path(sys.argv[1]) if len(sys.argv)>1 else ROOT/'post';out.mkdir(exist_ok=True)
 JEV='#3b3b3b';C={'4b':'#2a78d6','9b':'#1baf7a','27b':'#eb6834'};BG='#fcfcfb';INK='#0b0b0b';INK2='#52514e';GRID='#e6e6e2'
 NAMES={'jev':'Hosted Jev','4b':'Qwen3.5-4B','9b':'Qwen3.5-9B','27b':'Qwen3.8-27B'};ORDER=['jev','4b','9b','27b']
 plt.rcParams.update({'font.family':'DejaVu Sans','font.size':11,'axes.spines.top':False,'axes.spines.right':False,'axes.edgecolor':'#cfcfca','text.color':INK,'axes.labelcolor':INK2,'xtick.color':INK2,'ytick.color':INK2,'figure.facecolor':BG,'axes.facecolor':BG})
@@ -13,27 +14,28 @@ def color(k):return JEV if k=='jev' else C[k]
 def triptych(name,title,subtitle,panels):
  """panels: list of (panel title, unit, {arm: value}, fmt, lower_is_better). Missing panels are skipped."""
  panels=[p for p in panels if p[2]];n=len(panels)
- fig,axes=plt.subplots(1,n,figsize=(max(4.4*n+.6,8),4.6),squeeze=False);axes=axes[0];fig.subplots_adjust(left=.06,right=.98,top=.74,bottom=.2,wspace=.35)
- fig.text(.03,.92,title,fontsize=16,weight='bold');fig.text(.03,.855,subtitle,fontsize=10.5,color=INK2)
+ fig,axes=plt.subplots(1,n,figsize=(max(4.4*n+.6,8),4.6),squeeze=False);axes=axes[0];fig.subplots_adjust(left=.06,right=.98,top=.74 if subtitle else .8,bottom=.2,wspace=.35)
+ fig.text(.03,.92 if subtitle else .9,title,fontsize=16,weight='bold')
+ if subtitle:fig.text(.03,.855,subtitle,fontsize=10.5,color=INK2)
  for ax,(pt,unit,vals,fmt,lower) in zip(axes,panels):
   arms=[a for a in ORDER if a in vals];xs=range(len(arms));ys=[vals[a] for a in arms]
   ax.bar(xs,ys,color=[color(a) for a in arms],width=.62)
   for x,y in zip(xs,ys):ax.text(x,y,fmt(y),ha='center',va='bottom',fontsize=10.5,weight='bold')
   ax.axhline(vals['jev'],color=JEV,lw=1,ls='--',alpha=.6)
-  ax.set_xticks(list(xs),[NAMES[a] for a in arms],fontsize=9.5);ax.set_title(pt+('  (lower is better)' if lower else '  (higher is better)'),loc='left',fontsize=12,weight='bold');ax.set_ylabel(unit)
+  ax.set_xticks(list(xs),[NAMES[a] for a in arms],fontsize=9.5);ax.set_title(pt,loc='left',fontsize=12,weight='bold');ax.set_ylabel(unit)
   ax.grid(axis='y',color=GRID,lw=.8);ax.set_axisbelow(True);ax.tick_params(length=0,pad=6);ax.set_ylim(0,max(ys)*1.18)
   if pt.startswith('Accuracy'):ax.set_ylim(min(ys)-12,max(ys)+4)
  fig.savefig(out/(name+'.png'),dpi=170);fig.savefig(out/(name+'.svg'));plt.close(fig)
 pct=lambda v:f'{v:.1f}%';ms=lambda v:f'{v:.0f} ms';usd=lambda v:f'${v:.4f}'
 import json
-N=json.loads((pathlib.Path(__file__).resolve().parent/'post/numbers.json').read_text())   # built by refresh_numbers.py from one run
+N=json.loads((ROOT/'post/numbers.json').read_text())   # built by bench/refresh_numbers.py from one run
 H=N['hero']
 # 1. holdout: accuracy, speed, cost
-triptych('hero_holdout','975-question public holdout: accuracy, speed, cost','Same questions, same cloud client, one run. Speed = end-to-end p50, one request in flight. Cost per 1,000 answers: Jev as billed, ours at B200 list price at full load.',
- [('Accuracy','% correct',{k:H[k]['accuracy'] for k in H},pct,False),('Speed, end to end','milliseconds',{k:H[k]['p50_ms'] for k in H},ms,True),('Cost','USD per 1,000 answers',{k:H[k]['cost_per_1k'] for k in H},usd,True)])
+triptych('hero_holdout','975-question public benchmark: accuracy, speed, cost','',
+ [('Accuracy','% correct',{k:H[k]['accuracy'] for k in H},pct,False),('Speed, server to server','milliseconds',{k:H[k]['p50_ms'] for k in H},ms,True),('Cost, ours at Modal list price','USD per 1,000 answers',{k:H[k]['cost_per_1k'] for k in H},usd,True)])
 # 3. latency vs input length, from the concurrency-1 pass of the holdout load test (post/holdout_latency_by_length.json)
 import json
-BL=json.loads((pathlib.Path(__file__).resolve().parent/'post/holdout_latency_by_length.json').read_text())
+BL=json.loads((ROOT/'post/holdout_latency_by_length.json').read_text())
 fig,ax=plt.subplots(figsize=(8.5,5));fig.subplots_adjust(left=.1,right=.8,top=.8,bottom=.14)
 fig.text(.03,.92,'End-to-end latency vs input length',fontsize=16,weight='bold');fig.text(.03,.855,'975-question holdout bucketed by input tokens (Qwen tokenizer), one request in flight, end-to-end p50.',fontsize=10,color=INK2)
 xs=range(len(BL['labels']))

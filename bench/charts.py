@@ -1,7 +1,7 @@
 """Charts for the final comparison.
 
-usage: charts.py <out_dir> <load_dir> [<multiq_dir>]
-Reads <load_dir>/summary.json (from report.py) and optional <multiq_dir>/summary.json (from report_multiq.py).
+usage: bench/charts.py <out_dir> <load_dir> [<multiq_dir>]
+Reads <load_dir>/summary.json (from bench/report.py) and optional <multiq_dir>/summary.json (from bench/report_multiq.py).
 Writes throughput_cost.png, latency.png, accuracy.png, multiq.png (+ .svg) into <out_dir>.
 """
 import sys,json,math,pathlib

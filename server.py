@@ -16,7 +16,7 @@ runs=modal.Volume.from_name('jev-decision-training')
 cache=modal.Volume.from_name('jev-model-cache')
 REVISIONS={'Qwen/Qwen3.8-27B':'1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0','Qwen/Qwen3.5-9B':'c202236235762e1c871ad0ccb60c8ee5ba337b9a','Qwen/Qwen3.5-4B':'851bf6e806efd8d0a36b00ddf55e13ccb7b8cd0a','Qwen/Qwen3.5-2B':'15852e8c16360a2fea060d615a32b45270f8a8fc'}
 
-def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0,overhead_tokens=1024):
+def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0,overhead_tokens=256):
  import os,time,math,threading,collections,asyncio,hashlib,torch,uvicorn
  from fastapi import FastAPI
  from transformers import AutoTokenizer,AutoModelForImageTextToText
@@ -71,7 +71,7 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
  h=backbone.config.hidden_size
  headq=torch.nn.Linear(h,256,bias=False,device='cuda',dtype=torch.float32);headk=torch.nn.Linear(h,256,bias=False,device='cuda',dtype=torch.float32)
  headq.load_state_dict(checkpoint['headq']);headk.load_state_dict(checkpoint['headk'])
- state_format=checkpoint['metadata'].get('state_format','json')
+ state_format=checkpoint['metadata'].get('state_format','json');temperature=float(checkpoint['metadata'].get('temperature',1.0))   # calibration: scores/T before the softmax (set_temperature.py)
  # Optimized causal_conv1d kernel (the image builds it for this GPU family); verify it runs.
  import causal_conv1d,importlib
  model_module=importlib.import_module('transformers.models.qwen3_5.modeling_qwen3_5')
@@ -111,10 +111,11 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
   out=[]
   for i,(ids,positions) in enumerate(rows):
    q=headq(hidden[i,len(ids)-1].float());k=headk(hidden[i,positions].float())
-   out.append(((k*q).sum(-1)/16).softmax(-1))
+   out.append(((k*q).sum(-1)/16/temperature).softmax(-1))
   probs=torch.stack([torch.nn.functional.pad(p,(0,256-p.numel())) for p in out]).cpu()
   return [probs[i,:len(r[1])].tolist() for i,r in enumerate(rows)],inp.numel()
  # ---- dynamic batching worker ----
+ batch_cfg={'overhead_tokens':overhead_tokens}   # replaced by the calibrated value (fixed forward cost in tokens) below
  queue=collections.deque();cond=threading.Condition();stats=dict(batches=0,rows=0,gpu_seconds=0.,padded_tokens=0,batch_rows=collections.Counter(),started=time.perf_counter())
  def worker():
   torch.cuda.synchronize()
@@ -125,6 +126,9 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
    with cond:
     items=[queue.popleft() for _ in range(min(len(queue),max_rows))]
    items.sort(key=lambda it:len(it['ids']))
+   # All rows from one request (one in flight): run them as a single forward. Splitting a 20-question request over
+   # 16-token length buckets cost a second fixed overhead; cross-request batches below still use the marginal rule.
+   single=len(items)<=32 and len({it.get('req') for it in items})==1 and ((len(items[-1]['ids'])+15)//16)*16*len(items)<=max_padded_tokens
    # Split into length-homogeneous sub-batches: forward cost is ~linear in padded tokens once a batch has
    # >=2k tokens, so never let a long row drag short rows up to its padded length. A sub-batch closes when
    # padding waste would exceed 25% (once it already holds >=2k padded tokens) or the token budget is hit.
@@ -137,7 +141,7 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
     j=i+1;longest=((len(items[i]['ids'])+15)//16)*16
     while j<len(items):
      lnew=((len(items[j]['ids'])+15)//16)*16;extra=(lnew-longest)*(j-i)+(lnew-len(items[j]['ids']))
-     if lnew*(j+1-i)>max_padded_tokens or extra>overhead_tokens:break
+     if lnew*(j+1-i)>max_padded_tokens or (extra>batch_cfg['overhead_tokens'] and not single):break
      longest=lnew;j+=1
     # Triton autotunes fla's batch-keyed kernels for every new batch size (seconds each), so only run canonical
     # batch sizes: shrink to the largest canonical size that fits (leaving the rest queued) when the queue is deep,
@@ -165,7 +169,7 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
   run_rows([(_base[:_l],[_l-3,_l-2])]*_b)
  torch.cuda.synchronize();warm_seconds=time.perf_counter()-warm_start
  threading.Thread(target=worker,daemon=True).start()
- metadata=dict(model=name,revision=revision,checkpoint_run=checkpoint_run,checkpoint_sha256=checkpoint_sha256,training_examples=checkpoint['examples'],state_format=state_format,gpu=torch.cuda.get_device_name(),region=os.environ.get('MODAL_REGION'),precision='BF16 merged LoRA, FP32 pointer head',execution='eager, sdpa, optimized causal_conv1d, FLA_USE_COMPILE=0, cudnn sdp off',sdp_backends=sdp_backends,batcher='v10: v9 + marginal-cost overhead 1024 padded tokens (was 256), atomic enqueue per request, GPU work off the event loop, calibrated cost-model routing between independent rows and the shared-context path',canonical_batch_sizes=CANON,warm_seconds=warm_seconds,batching=dict(max_rows=max_rows,max_padded_tokens=max_padded_tokens,window_ms=window_ms,overhead_tokens=overhead_tokens),load_seconds=time.perf_counter()-born,causal_conv1d_version=causal_conv1d.__version__,linear_attention_kernels=fla_status,conv_smoke_max_absolute_delta=conv_delta)
+ metadata=dict(model=name,revision=revision,checkpoint_run=checkpoint_run,checkpoint_sha256=checkpoint_sha256,training_examples=checkpoint['examples'],state_format=state_format,temperature=temperature,gpu=torch.cuda.get_device_name(),region=os.environ.get('MODAL_REGION'),precision='BF16 merged LoRA, FP32 pointer head',execution='eager, sdpa, optimized causal_conv1d, FLA_USE_COMPILE=0, cudnn sdp off',sdp_backends=sdp_backends,batcher='v12: v9 + single-request rows run as one forward, cross-request marginal-cost overhead 256 padded tokens, atomic enqueue per request, GPU work off the event loop, calibrated cost-model routing between independent rows and the shared-context path',canonical_batch_sizes=CANON,warm_seconds=warm_seconds,batching=dict(max_rows=max_rows,max_padded_tokens=max_padded_tokens,window_ms=window_ms,overhead_tokens=overhead_tokens),load_seconds=time.perf_counter()-born,causal_conv1d_version=causal_conv1d.__version__,linear_attention_kernels=fla_status,conv_smoke_max_absolute_delta=conv_delta)
  api=FastAPI()
  @api.post('/ping')
  async def ping(body:dict):return metadata
@@ -237,7 +241,7 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
   hidden=backbone(input_ids=inp,attention_mask=fullmask,position_ids=pos[None].expand(n,-1),cache_position=pos,past_key_values=pc,use_cache=True).last_hidden_state
   probs=[]
   for i,(b,positions) in enumerate(zip(branches,positions_list)):
-   q=headq(hidden[i,len(b)-1].float());k=headk(hidden[i,[p-plen for p in positions]].float());probs.append(((k*q).sum(-1)/16).softmax(-1).cpu().tolist())
+   q=headq(hidden[i,len(b)-1].float());k=headk(hidden[i,[p-plen for p in positions]].float());probs.append(((k*q).sum(-1)/16/temperature).softmax(-1).cpu().tolist())
   torch.cuda.synchronize();t3=time.perf_counter()
   timing=dict(prefix_tokens=plen,branch_tokens=sum(map(len,branches)),computed_tokens=plen+sum(map(len,branches)),independent_tokens=sum(map(len,seqs)),prefill_ms=(t1-t0)*1000,fork_ms=(t2-t1)*1000,branch_ms=(t3-t2)*1000,gpu_ms=(t3-t0)*1000)
   validation=None
@@ -257,7 +261,9 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
  run_shared(_s256,_p256,256);run_shared(_s1k,_p1k,1024)   # first calls compile/warm the shared path; measure the second ones
  _,_tm,_=run_shared(_s256,_p256,256);_,_tm2,_=run_shared(_s1k,_p1k,1024)
  _fork_tok=max((_tm2['fork_ms']-_tm['fork_ms'])/(8*768),0.);_fork_branch=max(_tm['fork_ms']/8-_fork_tok*256,0.)
- calib=dict(fixed_ms=_fixed,ms_per_token=_slope,fork_ms_per_branch=_fork_branch,fork_ms_per_branch_token=_fork_tok,ms_1x256=_t1,ms_16x256=_t16,shared_8x256_ms=_tm['gpu_ms'],shared_8x1024_ms=_tm2['gpu_ms'])
+ # Note: deriving this threshold from fixed_ms/ms_per_token (2,142 tokens on the 4B) cost 20% throughput under load
+ # (26-37% more padded tokens per answer); the measured-best cross-request threshold stays at 256. See single-request rule in worker.
+ calib=dict(fixed_ms=_fixed,ms_per_token=_slope,overhead_tokens=batch_cfg['overhead_tokens'],fork_ms_per_branch=_fork_branch,fork_ms_per_branch_token=_fork_tok,ms_1x256=_t1,ms_16x256=_t16,shared_8x256_ms=_tm['gpu_ms'],shared_8x1024_ms=_tm2['gpu_ms'])
  metadata['routing']=dict(rule='shared if 2*fixed + computed tokens*slope + fork(n, prefix) < fixed + independent padded tokens*slope; floors: >=%d questions, >=%d-token state'%(SHARED_MIN_QUESTIONS,SHARED_MIN_PREFIX),**calib)
  def choose_shared(n,prefix_tokens,seq_lens):
   """Estimated GPU ms of both paths from the calibration above; independent rows assumed to fit one forward."""
@@ -300,7 +306,7 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
   # (with per-row appends, tokenizing 20 rows took longer than the 2 ms window and the request ran as two forwards).
   pend=[]
   for (ids,positions,keys),q in zip(enc,body['questions']):
-   fut=loop.create_future();futures.append(fut);meta.append((q['id'],keys));pend.append(dict(ids=ids,positions=positions,loop=loop,future=fut,t_enqueue=time.perf_counter()))
+   fut=loop.create_future();futures.append(fut);meta.append((q['id'],keys));pend.append(dict(ids=ids,positions=positions,loop=loop,future=fut,t_enqueue=time.perf_counter(),req=t0))
   with cond:queue.extend(pend);cond.notify()
   results=await asyncio.gather(*futures)
   answers={};detail=[]
@@ -312,7 +318,7 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
 
 COMMON=dict(port=8000,routing_region='us-west',cpu=8,memory=98304,max_containers=1,scaledown_window=300,startup_timeout=1800,unauthenticated=True,volumes={'/cache':cache,'/runs':runs})
 # Checkpoint run directories on the jev-decision-training volume. Edit before `modal deploy`.
-CHECKPOINTS={'9b':'full_20260922-091011_9b','27b':'full_20260922-091011_27b','4b':'full_20260922-091011_4b','2b':'full_20260922-091011_2b','4b_workflow':'synth_20260922-122120_4b','4b_balanced':'balanced_20260922-144201_4b','9b_balanced':'balanced_20260922-144201_9b'}
+CHECKPOINTS={'27b_jb':'jb_20260922-211844_27b','9b':'full_20260922-091011_9b','27b':'full_20260922-091011_27b','4b':'full_20260922-091011_4b','2b':'full_20260922-091011_2b','4b_workflow':'synth_20260922-122120_4b','4b_balanced':'balanced_20260922-144201_4b','9b_balanced':'balanced_20260922-144201_9b'}
 
 @app.server(image=blackwell_image,gpu='B200',compute_region='us-west',**COMMON)
 class Small9b:
@@ -328,6 +334,10 @@ class Small9h:
 class Dense27b:
  @modal.enter()
  def start(self):serve('Qwen/Qwen3.8-27B',CHECKPOINTS['27b'],max_padded_tokens=32768)
+@app.server(image=blackwell_image,gpu='B200',compute_region='us-west',**COMMON)
+class Dense27jb:
+ @modal.enter()
+ def start(self):serve('Qwen/Qwen3.8-27B',CHECKPOINTS['27b_jb'],max_padded_tokens=32768)
 
 @app.server(image=hopper_image,gpu='H100!',compute_region='us-west',**COMMON)
 class Dense27h:

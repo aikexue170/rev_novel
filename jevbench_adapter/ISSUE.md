@@ -13,8 +13,8 @@ projections and a small pointer head: the state, the question and the options ar
 head scores each option's slot; the softmax over the slots, divided by one calibration temperature (T = 1.70, fitted on
 the synthetic dev split, stored in the checkpoint, changes no choices), is the answer. Nothing is generated (0 output tokens), no
 token logprobs, no verbalized probabilities. One question per request in the benchmark setting; the server also takes
-several questions about one state in one request. Trained for one epoch on 19,792 public decisions (the 27B additionally on
-6,285 synthetic decisions with rule-derived labels), each seen in two option orders with a consistency term so the
+several questions about one state in one request. Trained for one epoch on 19,792 public decisions plus
+6,285 synthetic decisions with rule-derived labels, each seen in two option orders with a consistency term so the
 answer does not depend on where the right option sits.
 
 **Links.**
@@ -46,23 +46,22 @@ The mapping is the obvious one and is fixed in the adapter: `choice` criteria as
 sent as given and read back as `yes/no`, `score` levels as `{"0": ..., "1": ...}`. Inputs over 16,384 tokens are refused
 (HTTP 500 from the server's assertion), not truncated; at most 256 options.
 
-**Our own numbers on the public items** (self-measured, 27B only, the 231 public items through our server with your
+**Our own numbers on the public items** (self-measured, the 231 public items through our server with your
 scoring rules, `results/benchmarkheaven/` in the repo; the run of your own runner through this adapter is in
 `jevbench_adapter/runs/`):
 
-| tier | items | Rev Qwen3.8-27B |
-|---|---|---|
-| easy | 48 | 1.000 |
-| standard (original) | 72 | 0.986 |
-| hard (public half) | 111 | 0.793 |
-| pooled | 231 | 0.896 (207/231), 231/231 strict-valid |
+| tier | items | Rev Qwen3.8-27B | Rev Qwen3.5-4B |
+|---|---|---|---|
+| easy | 48 | 1.000 | 1.000 |
+| standard (original) | 72 | 0.986 | 0.931 |
+| hard (public half) | 111 | 0.793 | 0.595 |
+| pooled | 231 | 0.896 (207/231), 231/231 strict-valid | 0.784 (181/231), 231/231 strict-valid |
 
 Hard-tier top-label ECE 0.074; mean total variation to the gold distributions on the 10 public probability items 0.239.
 Your runner with our adapter against the same endpoint gives 208/231 (hard 89/111; ECE 0.078, TVD 0.249): one
 near-even item flips between runs, the rest agree item for item.
-Weak families on the public hard tier: temporal_numeric 5/15, long_policy 9/19. We have not run the 4B on the
-public items (it scores 87.6 % to the 27B's 92.0 % on our own 975-question holdout), so its numbers here are yours to
-find. These are public items only, half the hard tier and none of the judge tier; we are not claiming a rank from
+Weak families on the public hard tier: 27B temporal_numeric 5/15 and long_policy 9/19; 4B long_policy 6/19,
+temporal_numeric 3/15, tradeoff 2/6, ambiguous 2/7 (4B hard-tier ECE 0.129, TVD 0.235; T = 1.96). These are public items only, half the hard tier and none of the judge tier; we are not claiming a rank from
 them, and speed and cost are measured from your server.
 
 **What we ask.** An evaluation of both sizes on the full 534-decision suite on your own GPU from the public weights,
@@ -84,8 +83,8 @@ An exact normalized-text overlap check of the training set against the 231 publi
 (`TODO: path to the overlap-check output in the repo`). The public 231 were used as a development gate: after the
 first 27B scored 198/231 we read its misses, generated synthetic data of the failing shapes (long policies, date and
 quantity arithmetic, planted wrong notes) with rule-derived labels, and retrained once; that retrain is the model
-submitted, so expect the held-out hard items to score somewhat below the public ones. The 4B was not changed after
-seeing any JevBench number.
+submitted, so expect the held-out hard items to score somewhat below the public ones. The 4B was retrained once on the same synthetic mix,
+without reading its own misses.
 
 Happy to answer questions here or rerun anything.
 

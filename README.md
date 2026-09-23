@@ -40,7 +40,7 @@ Training took 33 minutes for the 9B, 63 for the 4B and 150 for the 27B, on one B
 - Reading the misses. The first 27B trailed Jev on JevBench's public items. 14 of its 33 misses copied a wrong human note planted in the input, and the untrained model was better at date arithmetic than our fine-tune. 6,285 synthetic decisions of those shapes, labels computed by rule, fixed most of it.
 -->
 
-![journey](post/journey.png)
+![what we tried](post/what_we_tried.svg)
 
 ## Honestly
 
@@ -143,31 +143,22 @@ Self-hosting is only cheap when the GPU is busy. At one request in flight our co
 
 Modal is close to the cheapest B200 we could find. At $5.98 an hour on RunPod, the lowest on-demand price, the 4B costs $0.0178 per 1,000 answers, half of Jev's price, and the 27B $0.0662. Every provider we checked is in [`results/holdout/GPU_PRICES.md`](results/holdout/GPU_PRICES.md).
 
-### JevBench
+### Outside leaderboards
 
-[JevBench](https://benchmarkheaven.com/jev-models) is Benchmark Heaven's suite for Jev-class models: 534 decisions in four tiers, written fresh by two frontier models and frozen before any system ran. 231 are public. The rest, including the whole judge tier, are held back and only the site can score them. We scored the 231 public items on our own servers with the site's scoring rules, and asked the maintainer to run the full suite from our public weights ([jevbench#52](https://github.com/fstandhartinger/jevbench/issues/52)).
+From our own testing, the 27B is the top open model on both public Jev leaderboards. It's ahead of Jev on JevBench and still behind it on the Decision Index.
 
-| System, on the same 231 public items | Accuracy | Hard tier | Intelligence axis | Calibration axis |
-|---|---:|---:|---:|---:|
-| Qwen3.8-27B (this repo) | 89.6% | 79.3% | 86.2 | 80.6 on the public hard items |
-| Hosted Jev 1.13 | 86.6% | 73.0% | 82.3 | 82.7 on the full hard tier |
-| Best other open reconstruction (reflex-27b) | 87.0% | 75.7% | 82.4 | |
-| Best 4B on the board (SemIf, Qwen3.5-4B) | 81.0% | 61.3% | 74.9 | |
-| Qwen3.5-4B (this repo) | 78.4% | 59.5% | 70.6 | 75.4 on the public hard items |
-| Frontier chat models (GPT-5.6, DeepSeek V4.1) | 97 to 98% | 96% | 96 to 97 | |
+| Our run of | Qwen3.8-27B | Hosted Jev | Best other open model |
+|---|---:|---:|---:|
+| [JevBench](https://benchmarkheaven.com/jev-models), 231 public items | 89.6% | 86.6% | 87.0% |
+| [Decision Index](https://huggingface.co/spaces/multimodalart/jev-decision-index), 1,046-request sample | 61.1 | 63.2 | 59.2 |
 
-No JevBench item went into training, and an overlap check of the training data against the 231 items found zero matches ([`results/benchmarkheaven/overlap_check.txt`](results/benchmarkheaven/overlap_check.txt)). We did use the public items to find what to fix. Our first 27B scored 85.7%, a point behind Jev. 14 of its 33 misses copied the conclusion of a wrong human note planted in the state, and the untrained base model was better than our fine-tune at date and number arithmetic. So we generated 6,285 decisions of those shapes, each with a deliberately wrong "helpful note" and a label computed by rule, and retrained. That retrain is the 27B in every table here. It lifted JevBench to 89.6% and our own benchmark from 91.1% to 92.0%. Expect the held-back hard items to score somewhat lower than the public ones.
+These are our measurements, not the boards'. We've asked JevBench to run the full suite ([#52](https://github.com/fstandhartinger/jevbench/issues/52)). No JevBench item was trained on, but we did read the first model's misses on its public items to decide what synthetic data to make, so expect its hidden items to score lower. Details in [`results/benchmarkheaven/`](results/benchmarkheaven/) and [`results/decision_index/`](results/decision_index/).
 
-Each checkpoint also carries a calibration temperature fitted on held-out synthetic data (1.70 for the 27B, 1.96 for the 4B). It changes no answers and took the 27B's calibration axis from 71.9 to 80.6. The 4B got the same data and lands 2.6 points behind the best 4B on the board. Its misses are long policies, date arithmetic and trade-offs, where a 4B reading once runs out of room. The site's headline score also weighs speed and cost from its own measurement, which only its run can produce.
-
-### Where Jev still wins
-
-- **Jev's own workflow questions.** On the 102 invoice, agent-trace, customer-service and security questions TypeSafe published, Jev gets 91, our 27B 88 and our 4B 84. Those are Jev's labels on Jev's distribution.
-- **The Decision Index.** On a 1,046-request sample of [this leaderboard](https://huggingface.co/spaces/multimodalart/jev-decision-index) of open Jev reproductions, 18 of its 19 benchmarks, our 27B scores 61.1 against Jev's 63.2 on the same benchmarks. That puts it ahead of every open reproduction listed but behind Jev. The gap is knowledge questions like MMLU and GPQA, where Jev scores like a much larger model. The sample's 95% interval is about plus or minus 4 points. Details in [`results/decision_index/`](results/decision_index/).
+Jev still wins on its own 102 published workflow questions: 91 to our 88.
 
 ### Credit: Kev
 
-[Kev](https://github.com/jaredpalmer/kev) by Jared Palmer was the first open reconstruction of Jev, and it's where our recipe comes from. Kev put a rank-16 LoRA and a pointer head on Qwen3.5-Base, published the weights, training code and serving path, and showed a small open model can play Jev's game at all. We changed the parts that limited it. Kev trains on about 12.6k short decisions and rejects states over 384 tokens, so it can't read a contract. Ours trains on states up to 4,096 tokens in two option orders, goes up to 27B, and gets its speed and cost from batched serving. With Kev's length limit lifted, Kev-9B scores 76.5% on our benchmark, which is what you'd expect from a model that never saw a long document in training.
+We borrowed the recipe, a LoRA and a pointer head on Qwen, from Jared Palmer's [Kev](https://github.com/jaredpalmer/kev). Thanks Jared.
 
 ## Reproduce
 

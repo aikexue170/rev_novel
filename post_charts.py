@@ -29,7 +29,7 @@ import json
 N=json.loads((pathlib.Path(__file__).resolve().parent/'post/numbers.json').read_text())   # built by refresh_numbers.py from one run
 H=N['hero']
 # 1. holdout: accuracy, speed, cost
-triptych('hero_holdout','975-question public holdout: accuracy, speed, cost','Same questions for every system, both called from the same cloud client. Speed = end-to-end p50, one request in flight. Cost per 1,000 answers: Jev as billed, ours at Modal B200 list price at full load.',
+triptych('hero_holdout','975-question public holdout: accuracy, speed, cost','Same questions, same cloud client, one run. Speed = end-to-end p50, one request in flight. Cost per 1,000 answers: Jev as billed, ours at B200 list price at full load.',
  [('Accuracy','% correct',{k:H[k]['accuracy'] for k in H},pct,False),('Speed, end to end','milliseconds',{k:H[k]['p50_ms'] for k in H},ms,True),('Cost','USD per 1,000 answers',{k:H[k]['cost_per_1k'] for k in H},usd,True)])
 # 3. latency vs input length, from the concurrency-1 pass of the holdout load test (post/holdout_latency_by_length.json)
 import json

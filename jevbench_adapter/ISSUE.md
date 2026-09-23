@@ -18,9 +18,9 @@ several questions about one state in one request. Trained for one epoch on 19,79
 answer does not depend on where the right option sits.
 
 **Links.**
-- Repo (MIT code): https://github.com/robbalian/rev — commit `TODO`
+- Repo (MIT code): https://github.com/robbalian/rev — commit `a175106`
 - Weights (MIT for the LoRA + head checkpoint; the base Qwen weights it merges into are Apache-2.0):
-  `robbalian/rev-qwen3.5-4b` revision `TODO`, `robbalian/rev-qwen3.8-27b` revision `TODO`
+  `robbalian/rev-qwen3.5-4b` revision `6c07755`, `robbalian/rev-qwen3.8-27b` revision `3622d32`
   (base `Qwen/Qwen3.5-4B`; `Qwen/Qwen3.8-27B` at `1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0`)
 - Adapter and registration patch: `jevbench_adapter/` (`rev_http.py`, `jevbench-registration.patch`,
   `test_rev_http_adapter.py`; written against `f79a1ca`)
@@ -30,7 +30,7 @@ answer does not depend on where the right option sits.
 **How to run.**
 
 ```sh
-git clone https://github.com/robbalian/rev && cd rev && git checkout TODO
+git clone https://github.com/robbalian/rev && cd rev && git checkout a175106
 pip install torch transformers accelerate huggingface_hub fastapi uvicorn   # optional: flash-linear-attention, causal-conv1d
 python serve_local.py --repo robbalian/rev-qwen3.8-27b --port 8000        # or robbalian/rev-qwen3.5-4b (fits in 12 GB); BF16
 # the base Qwen weights and their pinned revision come from the checkpoint's metadata
@@ -80,7 +80,7 @@ decision in `usage.input_tokens`).
 
 **Disclosure.** No JevBench item, public or held out, and no Jev output was used for training, tuning or selection.
 An exact normalized-text overlap check of the training set against the 231 public items found zero matches
-(`TODO: path to the overlap-check output in the repo`). The public 231 were used as a development gate: after the
+(`results/benchmarkheaven/overlap_check.txt`). The public 231 were used as a development gate: after the
 first 27B scored 198/231 we read its misses, generated synthetic data of the failing shapes (long policies, date and
 quantity arithmetic, planted wrong notes) with rule-derived labels, and retrained once; that retrain is the model
 submitted, so expect the held-out hard items to score somewhat below the public ones. The 4B was retrained once on the same synthetic mix,

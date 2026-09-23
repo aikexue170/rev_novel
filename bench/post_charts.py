@@ -62,18 +62,17 @@ ax.set_xscale('log',base=2);ax.set_xticks([1,8,32,128,256],['1','8','32','128','
 ax.set_yscale('log');ax.set_yticks([.02,.03,.05,.1,.2],['$0.02','$0.03','$0.05','$0.10','$0.20']);ax.yaxis.set_minor_locator(matplotlib.ticker.NullLocator())
 ax.set_xlabel('Concurrent requests in flight');ax.set_ylabel('USD per 1,000 answers');ax.grid(axis='y',color=GRID,lw=.8);ax.set_axisbelow(True);ax.tick_params(length=0,pad=6)
 fig.savefig(out/'cost_concurrency.png',dpi=170);fig.savefig(out/'cost_concurrency.svg');plt.close(fig)
-# 6. journey: accuracy by approach, and time to answer 20 questions by approach
-fig,axes=plt.subplots(1,2,figsize=(13,5.2));fig.subplots_adjust(left=.25,right=.97,top=.78,bottom=.14,wspace=1.05)
-fig.text(.03,.92,'The journey in two numbers',fontsize=16,weight='bold');fig.text(.03,.855,'Left: holdout accuracy by approach (Qwen3.5-4B unless noted). Right: end-to-end time to answer 20 questions on one document, one request in flight.',fontsize=10,color=INK2)
-acc=[('Letter logits, untrained (27B)',85.0,'#9a9a95'),('Head only, best layer',84.3,'#9a9a95'),('LoRA + head',87.6,C['4b']),('LoRA + head (Qwen3.8-27B)',91.1,C['27b'])]
-ax=axes[0];ys=range(len(acc));ax.barh(list(ys),[a[1] for a in acc],color=[a[2] for a in acc],height=.55)
-for y,a in zip(ys,acc):ax.text(a[1]+.2,y,f'{a[1]:.1f}%',va='center',fontsize=10.5,weight='bold')
-ax.axvline(H['jev']['accuracy'],color=JEV,lw=1.5,ls='--');ax.text(H['jev']['accuracy']+.2,-.62,'Hosted Jev %.1f%%'%H['jev']['accuracy'],fontsize=9.5,ha='left',weight='bold')
-ax.set_yticks(list(ys),[a[0] for a in acc]);ax.invert_yaxis();ax.set_xlim(78,94);ax.set_xlabel('% correct on the 975-question holdout');ax.grid(axis='x',color=GRID);ax.set_axisbelow(True);ax.tick_params(length=0);ax.spines['left'].set_visible(False)
-lat=[('JSON answers from a hosted chat model',5100,'#9a9a95'),('Compact outputs (Y/N letters, bitstrings)',3250,'#9a9a95'),('Hosted Jev',160,JEV),('LoRA + head, batched serving',86,C['4b'])]
-ax=axes[1];ys=range(len(lat));ax.barh(list(ys),[l[1] for l in lat],color=[l[2] for l in lat],height=.55)
-for y,l in zip(ys,lat):ax.text(l[1]*1.08,y,f'{l[1]:,} ms',va='center',fontsize=10.5,weight='bold')
-ax.set_yticks(list(ys),[l[0] for l in lat]);ax.invert_yaxis();ax.set_xscale('log');ax.set_xlim(50,20000);ax.set_xticks([100,1000,10000],['100 ms','1 s','10 s']);ax.xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
-ax.set_xlabel('time to answer 20 questions (log scale)');ax.grid(axis='x',color=GRID);ax.set_axisbelow(True);ax.tick_params(length=0);ax.spines['left'].set_visible(False)
+# 6. journey: accuracy by approach (top), time to answer 20 questions by approach (bottom)
+fig,axes=plt.subplots(2,1,figsize=(11,8.4));fig.subplots_adjust(left=.33,right=.95,top=.87,bottom=.08,hspace=.55)
+fig.text(.03,.945,'Iterating towards speed and accuracy',fontsize=17,weight='bold')
+acc=[('Read one token\'s odds, untrained (27B)',85.0,'#9a9a95'),('Frozen model + head, best layer (4B)',84.3,'#9a9a95'),('Hosted Jev',H['jev']['accuracy'],JEV),('LoRA + head (4B)',H['4b']['accuracy'],C['4b']),('LoRA + head (27B)',H['27b']['accuracy'],C['27b'])]
+ax=axes[0];ys=range(len(acc));ax.barh(list(ys),[a[1] for a in acc],color=[a[2] for a in acc],height=.58)
+for y,a in zip(ys,acc):ax.text(a[1]+.15,y,f'{a[1]:.1f}%',va='center',fontsize=11,weight='bold')
+ax.set_title('Accuracy',loc='left',fontsize=14,weight='bold',pad=10);ax.set_yticks(list(ys),[a[0] for a in acc],fontsize=11);ax.invert_yaxis();ax.set_xlim(80,94.5);ax.set_xlabel('% correct on the 975-question benchmark');ax.grid(axis='x',color=GRID);ax.set_axisbelow(True);ax.tick_params(length=0);ax.spines['left'].set_visible(False)
+lat=[('JSON answers from a chat model',5100,'#9a9a95'),('Shorter outputs (Y/N letters, bitstrings)',3250,'#9a9a95'),('Hosted Jev',N['multiq']['jev']['20']['p50_ms'],JEV),('LoRA + head, batched serving (4B)',N['multiq']['4b']['20']['p50_ms'],C['4b'])]
+ax=axes[1];ys=range(len(lat));ax.barh(list(ys),[l[1] for l in lat],color=[l[2] for l in lat],height=.58)
+for y,l in zip(ys,lat):ax.text(l[1]*1.08,y,f'{l[1]:,.0f} ms',va='center',fontsize=11,weight='bold')
+ax.set_title('Speed',loc='left',fontsize=14,weight='bold',pad=10);ax.set_yticks(list(ys),[l[0] for l in lat],fontsize=11);ax.invert_yaxis();ax.set_xscale('log');ax.set_xlim(50,20000);ax.set_xticks([100,1000,10000],['100 ms','1 s','10 s']);ax.xaxis.set_minor_locator(matplotlib.ticker.NullLocator())
+ax.set_xlabel('time to answer 20 questions on one document, server to server (log scale)');ax.grid(axis='x',color=GRID);ax.set_axisbelow(True);ax.tick_params(length=0);ax.spines['left'].set_visible(False)
 fig.savefig(out/'journey.png',dpi=170);fig.savefig(out/'journey.svg');plt.close(fig)
 print('wrote',sorted(p.name for p in out.iterdir()))

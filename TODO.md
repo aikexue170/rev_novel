@@ -11,17 +11,17 @@ Owner key: **C** = Claude does it, **R** = Rob does it, **C→R** = Claude prepa
 ## Weights on Hugging Face
 - [x] **C** `publish_weights.py`: packages LoRA adapters + pointer head + temperature + metadata from the Modal volume into a Hugging Face repo per model, with a model card.
 - [x] **C** `serve_local.py`: plain FastAPI server (no Modal) that loads the base model from the Hub and our checkpoint, exposes `/score` with the same contract; this is what the JevBench maintainer runs.
-- [x] **C** Weights uploaded as private repos: `robbalian/rev-qwen3.5-4b` (T=1.96), `robbalian/rev-qwen3.5-9b`, `robbalian/rev-qwen3.8-27b` (T=1.70). **R** flips them public with the repo.
+- [x] **C** Weights uploaded as private repos: `robbalian/rev-qwen3.5-4b` (T=1.96), `robbalian/rev-qwen3.5-9b`, `robbalian/rev-qwen3.8-27b` (T=1.70). All three public (2026-09-23).
 
 ## Repo public
 - [x] **C** `LICENSE` (MIT, your name), README pass for public readers (Run it section added).
 - [ ] **R** Write "The journey" section (marked in README). Keep or cut the "Honestly" section wording.
-- [ ] **R** Flip `robbalian/rev` to public.
+- [x] Repo public (2026-09-23).
 
 ## JevBench submission
 - [x] **C** Adapter for their harness (`jevbench_adapter/rev_http.py` + registration patch + tests), verified through their own runner: 208/231 live (one near-even item flips run to run).
 - [x] **C** Cost basis: `jevbench_adapter/COST_BASIS.md` (Modal list price at measured throughput; hosted-tariff estimate at 604 tokens/decision).
-- [~] **C→R** Issue text drafted at `jevbench_adapter/ISSUE.md` (TODOs left: commit hash, weight revisions, overlap-check path; filled at posting time). Claude posts it once the repo and weights are public.
+- [x] **C** Posted: https://github.com/fstandhartinger/jevbench/issues/52 (repo commit c4b25a2, weight revisions 6c07755 / 3622d32).
 - [ ] **C→R** Adapter PR from a fork (after the issue).
 
 ## Decision Index (the Hugging Face Space leaderboard)

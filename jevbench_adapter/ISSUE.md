@@ -1,5 +1,4 @@
-DRAFT, not posted. Items marked TODO need a real value before posting (weights revisions, repo commit, overlap-check
-path). Everything else is from the repo's measured results.
+Posted as https://github.com/fstandhartinger/jevbench/issues/52 on 2026-09-23. Kept here as the record of what was submitted.
 
 ---
 
@@ -18,7 +17,7 @@ several questions about one state in one request. Trained for one epoch on 19,79
 answer does not depend on where the right option sits.
 
 **Links.**
-- Repo (MIT code): https://github.com/robbalian/rev — commit `a175106`
+- Repo (MIT code): https://github.com/robbalian/rev — commit `c4b25a2`
 - Weights (MIT for the LoRA + head checkpoint; the base Qwen weights it merges into are Apache-2.0):
   `robbalian/rev-qwen3.5-4b` revision `6c07755`, `robbalian/rev-qwen3.8-27b` revision `3622d32`
   (base `Qwen/Qwen3.5-4B`; `Qwen/Qwen3.8-27B` at `1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0`)
@@ -30,7 +29,7 @@ answer does not depend on where the right option sits.
 **How to run.**
 
 ```sh
-git clone https://github.com/robbalian/rev && cd rev && git checkout a175106
+git clone https://github.com/robbalian/rev && cd rev && git checkout c4b25a2
 pip install torch transformers accelerate huggingface_hub fastapi uvicorn   # optional: flash-linear-attention, causal-conv1d
 python serve_local.py --repo robbalian/rev-qwen3.8-27b --port 8000        # or robbalian/rev-qwen3.5-4b (fits in 12 GB); BF16
 # the base Qwen weights and their pinned revision come from the checkpoint's metadata

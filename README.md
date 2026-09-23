@@ -15,8 +15,6 @@ The models, training data, and train scripts are available here.
 
 Rev is a LoRA tune plus a small pointer head on top of Qwen3.5-4B, Qwen3.5-9B and Qwen3.8-27B. The head picks one of the offered options directly, so nothing is generated.
 
-![how it works](post/how_it_works.svg)
-
 The training data is 19,792 public decisions: 4,000 each from the train splits of RACE, CosmosQA, MultiRC and Social IQa, 2,000 from ContractNLI, and 1,792 short classification and policy rows from 13 other public sets. The 4B and 27B also see 6,285 synthetic decisions we generated with rule-based labels. Every eval question, and every document it came from, was held out.
 
 The eval set is 975 held-out questions from the validation splits of those same 5 datasets. It's public and frozen in [`eval_sets/`](eval_sets/).
@@ -43,6 +41,9 @@ Question and token scaling- This architecture scaled well from 1, 5, 20 question
 Same with input length. Our method gets slower
 ![latency by length](post/latency_by_length.png)
 
+Hosted Jev does prompt caching on repeated questions which reduced their latency. We ended up building in a cache-buster at the top of requests for all of them to make the comparison more fair.
+
+![journey](post/journey.png)
 
 ## Honestly
 
@@ -158,7 +159,7 @@ These are our measurements, not the boards'; we've asked JevBench to run the ful
 
 ### Credit: Kev
 
-We borrowed the recipe, a LoRA and a pointer head on Qwen, from Jared Palmer's [Kev](https://github.com/jaredpalmer/kev). Thanks Jared.
+We borrowed the recipe, a LoRA and a pointer head on Qwen, from Jared Palmer's [Kev](https://github.com/jaredpalmer/kev). Thanks for the inspirations
 
 ## Reproduce
 

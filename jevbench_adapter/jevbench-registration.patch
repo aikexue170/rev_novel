@@ -1,0 +1,42 @@
+diff --git a/jevbench/adapters/__init__.py b/jevbench/adapters/__init__.py
+index c71d476..c9cc072 100644
+--- a/jevbench/adapters/__init__.py
++++ b/jevbench/adapters/__init__.py
+@@ -41,3 +41,4 @@ def NeedleLocalAdapter(**kw):  # lazy: only the Needle venv can import needle
+     return A(**kw)
+ 
+ from .qwen_flash_linear import QwenFlashLinearAdapter  # noqa: F401
++from .rev_http import RevHttpAdapter  # noqa: F401
+diff --git a/jevbench/cli.py b/jevbench/cli.py
+index da38bea..16d828b 100644
+--- a/jevbench/cli.py
++++ b/jevbench/cli.py
+@@ -25,7 +25,8 @@ from .adapters import (GradioSpaceAdapter, LocalOpenJevAdapter, NeedleLocalAdapt
+                        RemoteInprocAdapter, SemIfDirectAdapter, SgSystemOneAdapter, So1DeciderAdapter,
+                        TypeSafeAdapter, DjevAdapter,
+                        LayaLocalAdapter, Gliner2LocalAdapter, VerdictLocalAdapter, PawLocalAdapter,
+-                       ClassifierDevAdapter, CertoLocalAdapter, QwenFlashLinearAdapter)
++                       ClassifierDevAdapter, CertoLocalAdapter, QwenFlashLinearAdapter,
++                       RevHttpAdapter)
+ from .budget import Ledger
+ from .runner import DEFAULT_RESERVE_USD, Runner
+ from .summarize import public_export, summarize
+@@ -65,7 +66,8 @@ def cmd_run(args) -> int:
+              "laya_local": LayaLocalAdapter, "gliner2_local": Gliner2LocalAdapter,
+              "verdict_local": VerdictLocalAdapter, "paw_local": PawLocalAdapter,
+              "classifier_dev": ClassifierDevAdapter, "certo_local": CertoLocalAdapter,
+-             "qwen_flash_linear": QwenFlashLinearAdapter}
++             "qwen_flash_linear": QwenFlashLinearAdapter,
++             "rev_http": RevHttpAdapter}
+     if args.adapter not in ("typesafe", "djev", "needle_local", "semif_direct", "so1_decider", "sg_system_one", "classifier_dev") and not args.endpoint:
+         print(f"--endpoint required for {args.adapter}", file=sys.stderr)
+         return 2
+@@ -166,7 +168,7 @@ def main(argv=None) -> int:
+                                 "semif_direct", "so1_decider", "remote_inproc",
+                                 "sg_system_one", "djev", "laya_local", "gliner2_local",
+                                 "verdict_local", "paw_local", "classifier_dev", "certo_local",
+-                                "qwen_flash_linear"])
++                                "qwen_flash_linear", "rev_http"])
+     p_run.add_argument("--endpoint", default=None)
+     p_run.add_argument("--model", default=None)
+     p_run.add_argument("--key-env", dest="key_env",

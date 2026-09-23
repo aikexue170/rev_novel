@@ -1,0 +1,904 @@
+{
+  "engine": "dense27jb",
+  "counts": {
+    "ok": 77339,
+    "unsupported": 252
+  },
+  "successful_request_latency_ms": {
+    "median": 751.7323340289295,
+    "p95": 6204.994208645076,
+    "mean": 1988.759248660345
+  },
+  "benchmarks": [
+    {
+      "catalog_id": 1,
+      "dataset": "BFCL",
+      "requests": 1694,
+      "answered": 1694,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 1694,
+      "metric": "case exact accuracy",
+      "score": 0.961629279811098,
+      "reference_same_cases": null,
+      "median_ms": 1203.0528956092894,
+      "detail": {
+        "field_accuracy": 0.9848993288590604,
+        "case_exact_accuracy": 0.961629279811098,
+        "custom_metrics": {},
+        "positive_micro_f1": 0.9790940766550522
+      }
+    },
+    {
+      "catalog_id": 6,
+      "dataset": "RouterBench",
+      "requests": 10000,
+      "answered": 10000,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 10000,
+      "metric": "selected quality (quality objective)",
+      "score": 0.79765,
+      "reference_same_cases": null,
+      "median_ms": 4183.211354073137,
+      "tracks": {
+        "RouterBench-0shot": {
+          "metric": "selected quality (quality objective)",
+          "score": 0.7845792524485309,
+          "scored_requests": 5003
+        },
+        "RouterBench-5shot": {
+          "metric": "selected quality (quality objective)",
+          "score": 0.8107364418651191,
+          "scored_requests": 4997
+        }
+      },
+      "detail": {
+        "field_accuracy": null,
+        "case_exact_accuracy": null,
+        "custom_metrics": {
+          "quality_quality": 0.79765,
+          "quality_cost_usd": 0.00486535624,
+          "quality_utility": 0.79765,
+          "quality_oracle_optimal": 0.8434,
+          "quality_utility_regret": 0.12141,
+          "cost_aware_quality": 0.70904,
+          "cost_aware_cost_usd": 0.00056882027,
+          "cost_aware_utility": 0.7033517973,
+          "cost_aware_oracle_optimal": 0.1212,
+          "cost_aware_utility_regret": 0.212177545328
+        }
+      }
+    },
+    {
+      "catalog_id": 11,
+      "dataset": "ContractNLI",
+      "requests": 123,
+      "answered": 123,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 123,
+      "metric": "macro-F1",
+      "score": 0.8526184707874586,
+      "reference_same_cases": null,
+      "median_ms": 4393.344209063798,
+      "detail": {
+        "field_accuracy": 0.8928742228598756,
+        "case_exact_accuracy": 0.13821138211382114,
+        "macro_f1": 0.8526184707874586,
+        "custom_metrics": {}
+      }
+    },
+    {
+      "catalog_id": 20,
+      "dataset": "BPoMP",
+      "requests": 5000,
+      "answered": 5000,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 5000,
+      "metric": "accuracy",
+      "score": 0.9268,
+      "reference_same_cases": null,
+      "median_ms": 259.4261250924319,
+      "detail": {
+        "field_accuracy": 0.9268,
+        "case_exact_accuracy": 0.6979038224414303,
+        "custom_metrics": {},
+        "subgroups": {
+          "beam search": {
+            "n": 401,
+            "mean": 0.8179551122194514
+          },
+          "corrupted rhyme": {
+            "n": 376,
+            "mean": 0.9122340425531915
+          },
+          "delayed beam search": {
+            "n": 137,
+            "mean": 0.9343065693430657
+          },
+          "delete any 1 nonrhyming word": {
+            "n": 376,
+            "mean": 0.8882978723404256
+          },
+          "delete any 1 rhyming EOL word": {
+            "n": 376,
+            "mean": 0.9680851063829787
+          },
+          "delete any 1 word": {
+            "n": 376,
+            "mean": 0.8723404255319149
+          },
+          "delete any 2 nonrhyming words": {
+            "n": 376,
+            "mean": 0.9654255319148937
+          },
+          "delete any 2 rhyming EOL words": {
+            "n": 376,
+            "mean": 0.973404255319149
+          },
+          "delete any 2 words": {
+            "n": 376,
+            "mean": 0.9547872340425532
+          },
+          "delete any 3 nonrhyming words": {
+            "n": 376,
+            "mean": 0.9867021276595744
+          },
+          "delete any 3 rhyming words": {
+            "n": 376,
+            "mean": 0.9654255319148937
+          },
+          "delete any 3 words": {
+            "n": 376,
+            "mean": 0.9946808510638298
+          },
+          "shuffled rhyming lines": {
+            "n": 336,
+            "mean": 0.8422619047619048
+          },
+          "shuffled rhyming words": {
+            "n": 366,
+            "mean": 0.9016393442622951
+          }
+        }
+      }
+    },
+    {
+      "catalog_id": 21,
+      "dataset": "Humicroedit",
+      "requests": 2628,
+      "answered": 2628,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 2628,
+      "metric": "accuracy",
+      "score": 0.617199391171994,
+      "reference_same_cases": null,
+      "median_ms": 234.28052058443427,
+      "detail": {
+        "field_accuracy": 0.617199391171994,
+        "case_exact_accuracy": 0.617199391171994,
+        "custom_metrics": {}
+      }
+    },
+    {
+      "catalog_id": 22,
+      "dataset": "POP909-CL",
+      "requests": 2000,
+      "answered": 2000,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 2000,
+      "metric": "accuracy",
+      "score": 0.2695,
+      "reference_same_cases": null,
+      "median_ms": 5127.309541916475,
+      "detail": {
+        "field_accuracy": 0.2695,
+        "case_exact_accuracy": 0.2695,
+        "cluster_macro_accuracy": 0.2716044372294372,
+        "custom_metrics": {},
+        "subgroups": {
+          "A#7": {
+            "n": 1,
+            "mean": 0
+          },
+          "A#M": {
+            "n": 88,
+            "mean": 0.056818181818181816
+          },
+          "A#m": {
+            "n": 43,
+            "mean": 0.3023255813953488
+          },
+          "A#m7": {
+            "n": 7,
+            "mean": 0.42857142857142855
+          },
+          "A#maj7": {
+            "n": 3,
+            "mean": 0
+          },
+          "A7": {
+            "n": 4,
+            "mean": 0
+          },
+          "AM": {
+            "n": 73,
+            "mean": 0.2054794520547945
+          },
+          "Am": {
+            "n": 69,
+            "mean": 0.7101449275362319
+          },
+          "Am7": {
+            "n": 8,
+            "mean": 0.125
+          },
+          "Amaj7": {
+            "n": 3,
+            "mean": 0
+          },
+          "B7": {
+            "n": 2,
+            "mean": 0
+          },
+          "BM": {
+            "n": 88,
+            "mean": 0.2840909090909091
+          },
+          "Bdim": {
+            "n": 1,
+            "mean": 0
+          },
+          "Bhalf-dim7": {
+            "n": 1,
+            "mean": 0
+          },
+          "Bm": {
+            "n": 65,
+            "mean": 0.36923076923076925
+          },
+          "Bm7": {
+            "n": 6,
+            "mean": 0
+          },
+          "Bmaj7": {
+            "n": 3,
+            "mean": 0
+          },
+          "C#7": {
+            "n": 1,
+            "mean": 1
+          },
+          "C#M": {
+            "n": 78,
+            "mean": 0.34615384615384615
+          },
+          "C#aug / Faug / Aaug": {
+            "n": 1,
+            "mean": 0
+          },
+          "C#dim": {
+            "n": 1,
+            "mean": 0
+          },
+          "C#m": {
+            "n": 51,
+            "mean": 0.3137254901960784
+          },
+          "C#m7": {
+            "n": 8,
+            "mean": 0
+          },
+          "C#maj7": {
+            "n": 6,
+            "mean": 0.3333333333333333
+          },
+          "C#sus2 / G#sus4": {
+            "n": 4,
+            "mean": 0
+          },
+          "C#sus4 / F#sus2": {
+            "n": 6,
+            "mean": 0.16666666666666666
+          },
+          "C7": {
+            "n": 2,
+            "mean": 0.5
+          },
+          "CM": {
+            "n": 99,
+            "mean": 0.6565656565656566
+          },
+          "Cdim": {
+            "n": 1,
+            "mean": 0
+          },
+          "Cm": {
+            "n": 67,
+            "mean": 0.7313432835820896
+          },
+          "Cm7": {
+            "n": 4,
+            "mean": 0.75
+          },
+          "Cmaj7": {
+            "n": 1,
+            "mean": 0
+          },
+          "Csus2 / Gsus4": {
+            "n": 9,
+            "mean": 0.3333333333333333
+          },
+          "Csus4 / Fsus2": {
+            "n": 6,
+            "mean": 0.8333333333333334
+          },
+          "D#7": {
+            "n": 7,
+            "mean": 0
+          },
+          "D#M": {
+            "n": 86,
+            "mean": 0.023255813953488372
+          },
+          "D#aug / Gaug / Baug": {
+            "n": 1,
+            "mean": 0
+          },
+          "D#dim": {
+            "n": 1,
+            "mean": 0
+          },
+          "D#m": {
+            "n": 43,
+            "mean": 0.16279069767441862
+          },
+          "D#m7": {
+            "n": 3,
+            "mean": 0
+          },
+          "D#maj7": {
+            "n": 6,
+            "mean": 0
+          },
+          "D#sus2 / A#sus4": {
+            "n": 7,
+            "mean": 0
+          },
+          "D#sus4 / G#sus2": {
+            "n": 4,
+            "mean": 0
+          },
+          "D7": {
+            "n": 5,
+            "mean": 0
+          },
+          "DM": {
+            "n": 77,
+            "mean": 0.6753246753246753
+          },
+          "Dm": {
+            "n": 64,
+            "mean": 0.265625
+          },
+          "Dm7": {
+            "n": 8,
+            "mean": 0.375
+          },
+          "DmMaj7": {
+            "n": 1,
+            "mean": 0
+          },
+          "Dmaj7": {
+            "n": 3,
+            "mean": 0
+          },
+          "Dsus2 / Asus4": {
+            "n": 12,
+            "mean": 0
+          },
+          "Dsus4 / Gsus2": {
+            "n": 5,
+            "mean": 0.2
+          },
+          "E7": {
+            "n": 2,
+            "mean": 0
+          },
+          "EM": {
+            "n": 80,
+            "mean": 0.525
+          },
+          "Edim": {
+            "n": 1,
+            "mean": 0
+          },
+          "Em": {
+            "n": 74,
+            "mean": 0.16216216216216217
+          },
+          "Em7": {
+            "n": 6,
+            "mean": 0.16666666666666666
+          },
+          "Emaj7": {
+            "n": 1,
+            "mean": 0
+          },
+          "Esus2 / Bsus4": {
+            "n": 6,
+            "mean": 0
+          },
+          "Esus4 / Asus2": {
+            "n": 8,
+            "mean": 0
+          },
+          "F#7": {
+            "n": 2,
+            "mean": 0
+          },
+          "F#M": {
+            "n": 62,
+            "mean": 0.14516129032258066
+          },
+          "F#dim": {
+            "n": 1,
+            "mean": 0
+          },
+          "F#half-dim7": {
+            "n": 1,
+            "mean": 0
+          },
+          "F#m": {
+            "n": 58,
+            "mean": 0.22413793103448276
+          },
+          "F#m7": {
+            "n": 9,
+            "mean": 0
+          },
+          "F#mMaj7": {
+            "n": 1,
+            "mean": 0
+          },
+          "F#maj7": {
+            "n": 4,
+            "mean": 0
+          },
+          "F#sus4 / Bsus2": {
+            "n": 5,
+            "mean": 0
+          },
+          "F7": {
+            "n": 2,
+            "mean": 0
+          },
+          "FM": {
+            "n": 93,
+            "mean": 0.1827956989247312
+          },
+          "Fm": {
+            "n": 55,
+            "mean": 0.05454545454545454
+          },
+          "Fm7": {
+            "n": 7,
+            "mean": 0
+          },
+          "Fmaj7": {
+            "n": 4,
+            "mean": 0
+          },
+          "Fsus4 / A#sus2": {
+            "n": 9,
+            "mean": 0
+          },
+          "G#7": {
+            "n": 6,
+            "mean": 0
+          },
+          "G#M": {
+            "n": 88,
+            "mean": 0.17045454545454544
+          },
+          "G#m": {
+            "n": 50,
+            "mean": 0.5
+          },
+          "G#m7": {
+            "n": 4,
+            "mean": 0
+          },
+          "G#maj7": {
+            "n": 6,
+            "mean": 0
+          },
+          "G7": {
+            "n": 2,
+            "mean": 0
+          },
+          "GM": {
+            "n": 102,
+            "mean": 0.0784313725490196
+          },
+          "Gdim": {
+            "n": 1,
+            "mean": 0
+          },
+          "Gm": {
+            "n": 66,
+            "mean": 0.045454545454545456
+          },
+          "Gm7": {
+            "n": 7,
+            "mean": 0.14285714285714285
+          },
+          "Gmaj7": {
+            "n": 2,
+            "mean": 0
+          },
+          "NoChord": {
+            "n": 29,
+            "mean": 0
+          },
+          "Other": {
+            "n": 3,
+            "mean": 0
+          }
+        }
+      }
+    },
+    {
+      "catalog_id": 23,
+      "dataset": "cfcolor",
+      "requests": 5000,
+      "answered": 5000,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 5000,
+      "metric": "accuracy",
+      "score": 0.6438,
+      "reference_same_cases": null,
+      "median_ms": 483.5479788016528,
+      "detail": {
+        "field_accuracy": 0.6438,
+        "case_exact_accuracy": 0.6438,
+        "cluster_macro_accuracy": 0.6598607202610609,
+        "custom_metrics": {}
+      }
+    },
+    {
+      "catalog_id": 24,
+      "dataset": "MMLU",
+      "requests": 14033,
+      "answered": 14033,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 14033,
+      "metric": "accuracy",
+      "score": 0.8379533955675906,
+      "reference_same_cases": null,
+      "median_ms": 266.38379134237766,
+      "detail": {
+        "field_accuracy": 0.8379533955675906,
+        "case_exact_accuracy": 0.8379533955675906,
+        "custom_metrics": {}
+      }
+    },
+    {
+      "catalog_id": 25,
+      "dataset": "GPQA Diamond",
+      "requests": 196,
+      "answered": 196,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 196,
+      "metric": "accuracy",
+      "score": 0.47959183673469385,
+      "reference_same_cases": null,
+      "median_ms": 333.3386252634227,
+      "detail": {
+        "field_accuracy": 0.47959183673469385,
+        "case_exact_accuracy": 0.47959183673469385,
+        "custom_metrics": {}
+      }
+    },
+    {
+      "catalog_id": 30,
+      "dataset": "GSM8K",
+      "requests": 2638,
+      "answered": 2638,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 2638,
+      "metric": "accuracy",
+      "score": 0.7255496588324488,
+      "reference_same_cases": null,
+      "median_ms": 401.794187258929,
+      "tracks": {
+        "GSM8K-10choice": {
+          "metric": "accuracy",
+          "score": 0.6618650492797574,
+          "scored_requests": 1319
+        },
+        "GSM8K-4choice": {
+          "metric": "accuracy",
+          "score": 0.7892342683851402,
+          "scored_requests": 1319
+        }
+      },
+      "detail": {
+        "field_accuracy": 0.7255496588324488,
+        "case_exact_accuracy": 0.6163760424564063,
+        "custom_metrics": {}
+      }
+    },
+    {
+      "catalog_id": 31,
+      "dataset": "ChessBench",
+      "requests": 5000,
+      "answered": 5000,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 5000,
+      "metric": "accuracy",
+      "score": 0.1872,
+      "reference_same_cases": null,
+      "median_ms": 1073.1330830603838,
+      "detail": {
+        "field_accuracy": 0.1872,
+        "case_exact_accuracy": 0.1872,
+        "custom_metrics": {
+          "value_regret": 0.18780459294679996
+        }
+      }
+    },
+    {
+      "catalog_id": 37,
+      "dataset": "Amazon ESCI",
+      "requests": 5000,
+      "answered": 5000,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 5000,
+      "metric": "macro-F1",
+      "score": 0.541544954534806,
+      "reference_same_cases": null,
+      "median_ms": 745.1347296591848,
+      "detail": {
+        "field_accuracy": 0.6564,
+        "case_exact_accuracy": 0.6564,
+        "macro_f1": 0.541544954534806,
+        "custom_metrics": {}
+      }
+    },
+    {
+      "catalog_id": 40,
+      "dataset": "iSarcasmEval",
+      "requests": 4600,
+      "answered": 4600,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 4600,
+      "metric": "see separate subtask tracks",
+      "score": null,
+      "reference_same_cases": null,
+      "median_ms": 593.7991254031658,
+      "tracks": {
+        "iSarcasmEval-A-Ar": {
+          "metric": "see separate subtask tracks",
+          "score": null,
+          "scored_requests": 1400
+        },
+        "iSarcasmEval-A-En": {
+          "metric": "see separate subtask tracks",
+          "score": null,
+          "scored_requests": 1400
+        },
+        "iSarcasmEval-B-En": {
+          "metric": "see separate subtask tracks",
+          "score": null,
+          "scored_requests": 1400
+        },
+        "iSarcasmEval-C-Ar": {
+          "metric": "see separate subtask tracks",
+          "score": null,
+          "scored_requests": 200
+        },
+        "iSarcasmEval-C-En": {
+          "metric": "see separate subtask tracks",
+          "score": null,
+          "scored_requests": 200
+        }
+      },
+      "detail": {
+        "field_accuracy": 0.8227586206896552,
+        "case_exact_accuracy": 0.7160869565217391,
+        "macro_f1": 0.5378685402475135,
+        "custom_metrics": {},
+        "positive_f1_by_field": {
+          "sarcastic": 0.509469696969697,
+          "sarcasm": 0.518783542039356,
+          "irony": 0.07951070336391437,
+          "satire": 0.14893617021276595,
+          "understatement": 0.0,
+          "overstatement": 0.047058823529411764,
+          "rhetorical_question": 0.1375
+        },
+        "category_macro_f1": 0.205894133730735
+      }
+    },
+    {
+      "catalog_id": 41,
+      "dataset": "VAST",
+      "requests": 3006,
+      "answered": 3006,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 3006,
+      "metric": "macro-F1",
+      "score": 0.6753480044318718,
+      "reference_same_cases": null,
+      "median_ms": 1277.3958335164934,
+      "detail": {
+        "field_accuracy": 0.6756487025948104,
+        "case_exact_accuracy": 0.6756487025948104,
+        "macro_f1": 0.6753480044318718,
+        "custom_metrics": {}
+      }
+    },
+    {
+      "catalog_id": 43,
+      "dataset": "CRUXEval",
+      "requests": 570,
+      "answered": 570,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 570,
+      "metric": "accuracy",
+      "score": 0.7333333333333333,
+      "reference_same_cases": null,
+      "median_ms": 1331.358396448195,
+      "detail": {
+        "field_accuracy": 0.7333333333333333,
+        "case_exact_accuracy": 0.7333333333333333,
+        "custom_metrics": {}
+      }
+    },
+    {
+      "catalog_id": 44,
+      "dataset": "CLadder",
+      "requests": 5000,
+      "answered": 5000,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 5000,
+      "metric": "accuracy",
+      "score": 0.7408,
+      "reference_same_cases": null,
+      "median_ms": 909.6160833723843,
+      "detail": {
+        "field_accuracy": 0.7408,
+        "case_exact_accuracy": 0.7408,
+        "custom_metrics": {}
+      }
+    },
+    {
+      "catalog_id": 50,
+      "dataset": "Habermas Machine",
+      "requests": 1676,
+      "answered": 1676,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 1676,
+      "metric": "accuracy",
+      "score": 0.4266109785202864,
+      "reference_same_cases": null,
+      "median_ms": 1172.8151876013726,
+      "detail": {
+        "field_accuracy": 0.4266109785202864,
+        "case_exact_accuracy": 0.4266109785202864,
+        "custom_metrics": {
+          "normalized_rank_regret": 0.1893695306284805
+        }
+      }
+    },
+    {
+      "catalog_id": 2,
+      "dataset": "ToolRet",
+      "requests": 7704,
+      "answered": 7693,
+      "unsupported": 11,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 7693,
+      "metric": "nDCG@10",
+      "score": 0.4550956013139729,
+      "reference_same_cases": null,
+      "median_ms": 3199.9119580723345,
+      "detail": {
+        "field_accuracy": null,
+        "case_exact_accuracy": null,
+        "custom_metrics": {
+          "ndcg_at_10": 0.4550956013139729,
+          "mrr": 0.47922106916842067,
+          "recall_at_10": 0.5465132185722332,
+          "candidate_recall": 0.5793309316447234,
+          "scorable_candidate_recall": 0.5793049339845128,
+          "candidates_scored": 31.999220070193683,
+          "candidates_retrieved": 32,
+          "bm25_ndcg_at_10": 0.36929439395337504
+        }
+      }
+    },
+    {
+      "catalog_id": 36,
+      "dataset": "BRIGHT",
+      "requests": 1297,
+      "answered": 1297,
+      "unsupported": 0,
+      "errors": 0,
+      "abstained": 0,
+      "pending": 0,
+      "scored_requests": 1297,
+      "metric": "nDCG@10",
+      "score": 0.18996710158322033,
+      "reference_same_cases": null,
+      "median_ms": 4569.799750111997,
+      "detail": {
+        "field_accuracy": null,
+        "case_exact_accuracy": null,
+        "custom_metrics": {
+          "ndcg_at_10": 0.18996710158322033,
+          "mrr": 0.2710432882112841,
+          "recall_at_10": 0.1950585163406068,
+          "candidate_recall": 0.21564576198761773,
+          "scorable_candidate_recall": 0.21564576198761773,
+          "candidates_scored": 31.998457979953738,
+          "candidates_retrieved": 32,
+          "bm25_ndcg_at_10": 0.11147907533380877
+        }
+      }
+    }
+  ],
+  "note": "Native benchmark metrics on complete supported case groups. Unsupported cases excluded from accuracy but retained in coverage."
+}

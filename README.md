@@ -145,14 +145,14 @@ Modal is close to the cheapest B200 we could find. At $5.98 an hour on RunPod, t
 
 ### Outside leaderboards
 
-From our own testing, the 27B is the top open model on both public Jev leaderboards: ahead of Jev on JevBench, still behind it on the Decision Index.
+From our own testing, the 27B tops both public Jev leaderboards, ahead of Jev and every open model.
 
 | Our run of | Qwen3.8-27B | Hosted Jev | Best other open model |
 |---|---:|---:|---:|
 | [JevBench](https://benchmarkheaven.com/jev-models), 231 public items | 89.6% | 86.6% | 87.0% |
-| [Decision Index](https://huggingface.co/spaces/multimodalart/jev-decision-index), 1,046-request sample | 61.1 | 63.2 | 59.2 |
+| [Decision Index](https://huggingface.co/spaces/multimodalart/jev-decision-index), all 19 benchmarks, 77,591 requests | 59.8 | 59.5 | 55.7 |
 
-These are our measurements, not the boards'; we've asked JevBench to run the full suite ([#52](https://github.com/fstandhartinger/jevbench/issues/52)). No JevBench item was trained on, but we read our first model's misses on its public items to decide what synthetic data to make. Details in [`results/`](results/).
+These are our measurements with each board's own scoring, not the boards' runs. The Decision Index lead is narrow: we're well ahead on contracts and tools and well behind on knowledge questions like GPQA and MMLU. We've asked JevBench to run the full suite ([#52](https://github.com/fstandhartinger/jevbench/issues/52)). No JevBench item was trained on, but we read our first model's misses on its public items to decide what synthetic data to make. Details in [`results/`](results/).
 
 ### Credit: Kev
 

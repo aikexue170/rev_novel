@@ -1,0 +1,113 @@
+{
+  "engine": "decision_index_adapter.run_parallel:RevHttpEngine",
+  "engine_options": {
+    "base_url": "https://reprompt--jev-beat-serve-dense27jb.us-west.modal.direct",
+    "concurrency": 16
+  },
+  "model_source": {
+    "kind": "http",
+    "base_url": "https://reprompt--jev-beat-serve-dense27jb.us-west.modal.direct",
+    "server_metadata": {
+      "model": "Qwen/Qwen3.8-27B",
+      "revision": "1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0",
+      "checkpoint_run": "jb_20260922-211844_27b",
+      "checkpoint_sha256": "6a4667b7ebc3d2afaffa70e558e08284e8408d6347a4ddc8071212f7637fa60c",
+      "training_examples": 25886,
+      "state_format": "raw",
+      "temperature": 1.7,
+      "gpu": "NVIDIA B200",
+      "precision": "BF16 merged LoRA, FP32 pointer head"
+    },
+    "code": "https://github.com/robbalian/rev",
+    "policy": "Unmodified state and questions sent as one /score request per suite row (questions map -> list of {id, instructions, criteria}; object instructions/descriptions JSON-serialized). Rows over the server's 16,384-token row limit are Unsupported, never truncated. Transport errors retried; a valid answer is never retried.",
+    "row_token_limit": 16384
+  },
+  "server": "https://reprompt--jev-beat-serve-dense27jb.us-west.modal.direct",
+  "server_metadata": {
+    "model": "Qwen/Qwen3.8-27B",
+    "revision": "1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0",
+    "checkpoint_run": "jb_20260922-211844_27b",
+    "checkpoint_sha256": "6a4667b7ebc3d2afaffa70e558e08284e8408d6347a4ddc8071212f7637fa60c",
+    "training_examples": 25886,
+    "state_format": "raw",
+    "temperature": 1.7,
+    "gpu": "NVIDIA B200",
+    "region": "us-west",
+    "precision": "BF16 merged LoRA, FP32 pointer head",
+    "execution": "eager, sdpa, optimized causal_conv1d, FLA_USE_COMPILE=0, cudnn sdp off",
+    "sdp_backends": {
+      "cudnn": false,
+      "flash": true,
+      "mem_efficient": true,
+      "math": true
+    },
+    "batcher": "v12: v9 + single-request rows run as one forward, cross-request marginal-cost overhead 256 padded tokens, atomic enqueue per request, GPU work off the event loop, calibrated cost-model routing between independent rows and the shared-context path",
+    "canonical_batch_sizes": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      20,
+      24,
+      28,
+      32,
+      40,
+      48,
+      56,
+      64,
+      80,
+      96,
+      112,
+      128
+    ],
+    "warm_seconds": 45.565621201,
+    "batching": {
+      "max_rows": 128,
+      "max_padded_tokens": 32768,
+      "window_ms": 2.0,
+      "overhead_tokens": 256
+    },
+    "load_seconds": 63.625012717000004,
+    "causal_conv1d_version": "1.7.0",
+    "linear_attention_kernels": "fla 0.5.2 importable; triton 3.8.0",
+    "conv_smoke_max_absolute_delta": 0.0625,
+    "routing": {
+      "rule": "shared if 2*fixed + computed tokens*slope + fork(n, prefix) < fixed + independent padded tokens*slope; floors: >=3 questions, >=64-token state",
+      "fixed_ms": 30.28645593334337,
+      "ms_per_token": 0.055092261979165315,
+      "overhead_tokens": 256,
+      "fork_ms_per_branch": 0.17448029166544643,
+      "fork_ms_per_branch_token": 6.839485677118118e-05,
+      "ms_1x256": 44.39007500000969,
+      "ms_16x256": 255.9443610000045,
+      "shared_8x256_ms": 96.61296299999833,
+      "shared_8x1024_ms": 127.62395599999365
+    },
+    "host": {
+      "cpu": "unknown",
+      "python_loop_ms": 39.45963299999988,
+      "accepted_slow": false,
+      "host_max_loop_ms": 60.0,
+      "nvidia_smi": "NVIDIA B200, 1890 MHz, 1965 MHz, 1000.00 W, P0, 5",
+      "region": "us-west",
+      "cloud": "CLOUD_PROVIDER_UNSPECIFIED",
+      "cpu_count": 24
+    }
+  },
+  "frozen_corpus_sha256": "83890013a6783b09aa9b309c06ccf9afb51e1ee5ec8a5458c1e932a59998e661",
+  "rows_path": "/private/tmp/claude-501/-Users-rob-Documents-ChatGPT-Jev/00778d75-7b56-4974-b1cd-e1de4841c85d/scratchpad/full/rows19_skip.jsonl.gz",
+  "runner_sha256": "afdefb6dbde9ab028ff57da8784de9896d343305d2f30bb98fc8eb43fcc34411",
+  "latency": "HTTP request wall time against the configured Rev /score endpoint (server-side prompt construction, batching queue and inference); excludes server start. Concurrency 16: wall time includes queueing behind the other in-flight requests."
+}

@@ -65,14 +65,14 @@ Jev's API takes several questions about one state in a single request, so we tes
 
 [JevBench](https://benchmarkheaven.com/jev-models) is Benchmark Heaven's suite for Jev-class models: 534 decisions in four tiers, authored fresh by two frontier models and frozen before any system ran. 231 of them are public; the rest, including the whole judge tier, are held back and only the site can score them. We scored the 231 public items with the site's own scoring rules on our server and did not submit anything. Nothing from JevBench went into training, and an overlap check against the training set found zero hits.
 
-| System, on the same 231 public items | Accuracy | Hard tier | Intelligence axis |
-|---|---:|---:|---:|
-| Qwen3.8-27B (this repo) | 89.6% | 79.3% | 86.2 |
-| Hosted Jev 1.13 | 86.6% | 73.0% | 82.3 |
-| Best other open reconstruction (reflex-27b) | 87.0% | 75.7% | 82.4 |
-| Frontier chat models (GPT-5.6, DeepSeek V4.1) | 97 to 98% | 96% | 96 to 97 |
+| System, on the same 231 public items | Accuracy | Hard tier | Intelligence axis | Calibration axis |
+|---|---:|---:|---:|---:|
+| Qwen3.8-27B (this repo) | 89.6% | 79.3% | 86.2 | 80.6 on the public hard items |
+| Hosted Jev 1.13 | 86.6% | 73.0% | 82.3 | 82.7 on the full hard tier |
+| Best other open reconstruction (reflex-27b) | 87.0% | 75.7% | 82.4 | |
+| Frontier chat models (GPT-5.6, DeepSeek V4.1) | 97 to 98% | 96% | 96 to 97 | |
 
-Our first 27B scored 85.7% here, a point behind Jev. Reading its 33 misses showed that 14 of them copied the conclusion of a wrong human note planted in the state, and that the untrained backbone was better than our fine-tune at date and number arithmetic. So we generated 6,285 synthetic decisions of those shapes (long policies with lookups, date and quantity arithmetic, multi-hop records, routing, traps, yes/no and ordered-level questions), every label derived by rule from the generated facts and a wrong "helpful note" planted on purpose, and retrained the 27B on the public mix plus those. That retrain is the 27B in every table above: JevBench rose to 89.6% and the 975-question holdout went from 91.1% to 92.0%. The site's composite score also weighs calibration, speed and cost from its own serial measurement, which we have not run.
+Our first 27B scored 85.7% here, a point behind Jev. Reading its 33 misses showed that 14 of them copied the conclusion of a wrong human note planted in the state, and that the untrained backbone was better than our fine-tune at date and number arithmetic. So we generated 6,285 synthetic decisions of those shapes (long policies with lookups, date and quantity arithmetic, multi-hop records, routing, traps, yes/no and ordered-level questions), every label derived by rule from the generated facts and a wrong "helpful note" planted on purpose, and retrained the 27B on the public mix plus those. That retrain is the 27B in every table above: JevBench rose to 89.6% and the 975-question holdout went from 91.1% to 92.0%. Calibration is a single temperature (1.70) fitted on the synthetic dev split and stored in the checkpoint; it changes no choices and took the calibration axis from 71.9 to 80.6. The site's composite score also weighs speed and cost from its own serial measurement, which only a submission can produce.
 
 
 ## The journey

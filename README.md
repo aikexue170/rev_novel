@@ -4,6 +4,11 @@ Rev is a set of 3 decision models built on Qwen that beat Jev on accuracy and sp
 The models, training data, and train scripts are available here.
 
 ![holdout](post/hero_holdout.png)
+_Benchmarks across hosted Jev and our 3 versions_
+
+![Snake head-to-head](results/snake/headtohead.gif)
+_The most important benchmark these days: an eye-catching twitter demo_
+
 
 ## Base model, training, serving, and eval
 | Model | Accuracy | Speed (server-to-server) | Cost per 1k |
@@ -15,7 +20,7 @@ The models, training data, and train scripts are available here.
 
 Rev is a LoRA tune plus a small pointer head on top of Qwen3.5-4B, Qwen3.5-9B and Qwen3.8-27B. The head picks one of the offered options directly, so nothing is generated.
 
-The training data is 19,792 public decisions: 4,000 each from the train splits of RACE, CosmosQA, MultiRC and Social IQa, 2,000 from ContractNLI, and 1,792 short classification and policy rows from 13 other public sets. The 4B and 27B also see 6,285 synthetic decisions we generated with rule-based labels. Every eval question, and every document it came from, was held out.
+The training data is 19,792 public decisions: from the train splits of RACE, CosmosQA, MultiRC and Social IQa, ContractNLI, and short classification and policy rows from 13 other public sets.
 
 The eval set is 975 held-out questions from the validation splits of those same 5 datasets. It's public and frozen in [`eval_sets/`](eval_sets/).
 
@@ -38,20 +43,12 @@ Here's a few of the ideas that didn't work:
 Question and token scaling- This architecture scaled well from 1, 5, 20 questions but hosted Jev is impressively flat. 
 ![multiq](post/multiq.png)
 
-Same with input length. Our method gets slower
+Same with input length. Our method gets slower while theirs is flat, indicating either constant-state prefill or prefill that is so fast it's drowned by other overhead.
 ![latency by length](post/latency_by_length.png)
 
 Hosted Jev does prompt caching on repeated questions which reduced their latency. We ended up building in a cache-buster at the top of requests for all of them to make the comparison more fair.
 
 ![journey](post/journey.png)
-
-## Honestly
-
-This is all Claude Code and GPT plus minor intuition. One person, two coding agents, four days and $438 of GPU rebuilt a well-funded startup's flagship model. We didn't use their weights, their data or their team: just their public API, public datasets and a credit card.
-
-The model was never the moat. The idea, the launch, the developer mindshare and the API people build against are.
-
-Jev is pretty amazing as a concept and idea. It moved things forward and they had an amazing launch. It clearly caught the attention of developers, which is exactly what it should do. They're going to get cloned, copied, and beaten, but maybe it doesn't matter because they're top of mind.
 
 ## Snake
 

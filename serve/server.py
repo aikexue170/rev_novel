@@ -227,7 +227,7 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
  def state_prefix_len(state):
   st=state if (state_format=='raw' and isinstance(state,str)) else json.dumps(state,separators=(',',':'))
   return len(tok.encode('State:\n'+st+'\n',add_special_tokens=False))
- SHARED_MIN_QUESTIONS=3;SHARED_MIN_PREFIX=64   # floors; the calibrated cost model below makes the actual choice
+ SHARED_MIN_QUESTIONS=3;SHARED_MAX_FORK_TOKENS=24576;SHARED_MIN_PREFIX=64   # floors; the calibrated cost model below makes the actual choice
  @torch.inference_mode()
  def run_shared(seqs,positions_list,state_len,validate=False):
   """Shared-context execution: prefill the common prefix once, fork the cache (attention KV + recurrent/conv states)
@@ -274,6 +274,9 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
  def choose_shared(n,prefix_tokens,seq_lens):
   """Estimated GPU ms of both paths from the calibration above; independent rows assumed to fit one forward."""
   if n<SHARED_MIN_QUESTIONS or prefix_tokens<SHARED_MIN_PREFIX:return False
+  # Forking a long prefix into many branches crashed the fla DeltaNet kernels with an illegal memory access (ToolRet: 28
+  # questions on a ~1.6k-token state, ~46k forked tokens). Above this size the rows path is used; it handles those fine.
+  if n*prefix_tokens>SHARED_MAX_FORK_TOKENS:return False
   rows_ms=calib['fixed_ms']+sum(((l+15)//16)*16 for l in seq_lens)*calib['ms_per_token']
   shared_ms=2*calib['fixed_ms']+(prefix_tokens+sum(l-prefix_tokens for l in seq_lens))*calib['ms_per_token']+n*(calib['fork_ms_per_branch']+prefix_tokens*calib['fork_ms_per_branch_token'])
   return shared_ms<rows_ms

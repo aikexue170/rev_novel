@@ -7,7 +7,7 @@
   "state_format": "raw",
   "temperature": 1.7,
   "gpu": "NVIDIA B200",
-  "region": "us-west",
+  "region": "seattle",
   "precision": "BF16 merged LoRA, FP32 pointer head",
   "execution": "eager, sdpa, optimized causal_conv1d, FLA_USE_COMPILE=0, cudnn sdp off",
   "sdp_backends": {
@@ -47,36 +47,36 @@
     112,
     128
   ],
-  "warm_seconds": 43.06578498499999,
+  "warm_seconds": 47.252559082999994,
   "batching": {
     "max_rows": 128,
     "max_padded_tokens": 32768,
     "window_ms": 2.0,
     "overhead_tokens": 256
   },
-  "load_seconds": 65.435015536,
+  "load_seconds": 68.353929023,
   "causal_conv1d_version": "1.7.0",
   "linear_attention_kernels": "fla 0.5.2 importable; triton 3.8.0",
   "conv_smoke_max_absolute_delta": 0.0625,
   "routing": {
     "rule": "shared if 2*fixed + computed tokens*slope + fork(n, prefix) < fixed + independent padded tokens*slope; floors: >=3 questions, >=64-token state",
-    "fixed_ms": 28.44540893333184,
-    "ms_per_token": 0.05347920729166974,
+    "fixed_ms": 41.72418620001205,
+    "ms_per_token": 0.05104839765624666,
     "overhead_tokens": 256,
-    "fork_ms_per_branch": 0.17860637499881685,
-    "fork_ms_per_branch_token": 5.895996093898311e-05,
-    "ms_1x256": 42.136085999999295,
-    "ms_16x256": 247.49624200001108,
-    "shared_8x256_ms": 98.68100299999583,
-    "shared_8x1024_ms": 124.41116500001215
+    "fork_ms_per_branch": 0.17972099999852276,
+    "fork_ms_per_branch_token": 5.837353515836252e-05,
+    "ms_1x256": 54.792576000011195,
+    "ms_16x256": 250.81842299999835,
+    "shared_8x256_ms": 120.57721899999763,
+    "shared_8x1024_ms": 135.21897300000774
   },
   "host": {
     "cpu": "unknown",
-    "python_loop_ms": 42.66343799999994,
+    "python_loop_ms": 41.67728999999909,
     "accepted_slow": false,
     "host_max_loop_ms": 60.0,
     "nvidia_smi": "NVIDIA B200, 1965 MHz, 1965 MHz, 1000.00 W, P0, 5",
-    "region": "us-west",
+    "region": "seattle",
     "cloud": "CLOUD_PROVIDER_UNSPECIFIED",
     "cpu_count": 24
   }

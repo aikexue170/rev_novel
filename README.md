@@ -1,6 +1,6 @@
 # Rev: Beating Jev on accuracy, speed, and cost
 
-Rev is a set of open-weight decision models: a Qwen backbone with a rank-16 LoRA and a small pointer head that picks one of the offered options without generating a token. On a 975-question public benchmark, Qwen3.5-4B and Qwen3.5-9B are more accurate than Hosted Jev, answer in well under half the time end to end, and cost 1.3x to 1.7x less per answer at load; Qwen3.8-27B is 7 points more accurate and still faster. One person and two coding agents built this in about three days.
+Rev is a set of open-weight decision models: a Qwen backbone with a rank-16 LoRA and a small pointer head that picks one of the offered options without generating a token. On a 975-question public benchmark, Qwen3.5-4B and Qwen3.5-9B are more accurate than Hosted Jev, answer in about a quarter of the time end to end, and cost 1.2x to 1.7x less per answer at load; Qwen3.8-27B is 7 points more accurate and still faster. One person and two coding agents built this in about three days.
 
 ## The benchmark
 
@@ -24,12 +24,12 @@ So the set spans two-line situations to 3,600-token contracts, yes/no to four-wa
 
 | Model | Accuracy | Speed (end to end) | Cost per 1k |
 |---|---:|---:|---:|
-| Hosted Jev | 85.2% | 159 ms | $0.0366 |
-| Qwen3.5-4B | 87.6% | 65 ms | $0.0220 |
-| Qwen3.5-9B | 88.7% | 62 ms | $0.0279 |
-| Qwen3.8-27B | 92.0% | 88 ms | $0.0812 |
+| Hosted Jev | 85.0% | 142 ms | $0.0366 |
+| Qwen3.5-4B | 87.7% | 37 ms | $0.0220 |
+| Qwen3.5-9B | 88.7% | 40 ms | $0.0297 |
+| Qwen3.8-27B | 92.0% | 75 ms | $0.0819 |
 
-95% intervals are about plus or minus 2 points, so the 4B is at the edge of a tie and the 9B and 27B are clearly ahead. All four systems were measured in one run from one client (`results/holdout/`), and Jev's accuracy moves by a few questions between runs (84.7% to 85.2% across ours). For the record, on Jev's own published set of 102 workflow questions Jev still leads, 91 to 88; the full numbers are in [`results/`](results/).
+95% intervals are about plus or minus 2 points, so the 4B is at the edge of a tie and the 9B and 27B are clearly ahead. All four systems were measured in one run from one client (`results/holdout/`); Jev's accuracy moves by a few questions between runs (84.7% to 85.2% across ours) and every system's latency moves with where the client container lands, so compare within a table, not across runs. For the record, on Jev's own published set of 102 workflow questions Jev still leads, 91 to 88; the full numbers are in [`results/`](results/).
 
 ### Speed by input length
 
@@ -39,23 +39,23 @@ Same run, bucketed by input tokens. Jev is flat at every length; ours grow with 
 
 | Model | under 256 tokens | 256 to 512 | 512 to 1k | 1k to 2k | over 2k |
 |---|---:|---:|---:|---:|---:|
-| Hosted Jev | 157 ms | 161 ms | 165 ms | 154 ms | 163 ms |
-| Qwen3.5-4B | 63 ms | 64 ms | 66 ms | 70 ms | 89 ms |
-| Qwen3.5-9B | 61 ms | 61 ms | 62 ms | 74 ms | 99 ms |
-| Qwen3.8-27B | 87 ms | 87 ms | 93 ms | 143 ms | 216 ms |
+| Hosted Jev | 140 ms | 141 ms | 144 ms | 144 ms | 150 ms |
+| Qwen3.5-4B | 37 ms | 37 ms | 38 ms | 44 ms | 63 ms |
+| Qwen3.5-9B | 39 ms | 39 ms | 40 ms | 52 ms | 76 ms |
+| Qwen3.8-27B | 74 ms | 74 ms | 75 ms | 113 ms | 196 ms |
 
 ### Speed by questions per request
 
-Jev's API takes several questions about one state in a single request, so we tested that too: four synthetic invoices, 1, 5 or 20 yes/no questions each, every request carrying a fresh reference id so neither side can serve it from a cache. Jev's latency is flat in the number of questions. Ours grows, but the 4B and 9B answer 20 questions in well under Jev's time and the 27B matches it.
+Jev's API takes several questions about one state in a single request, so we tested that too: four synthetic invoices, 1, 5 or 20 yes/no questions each, every request carrying a fresh reference id so neither side can serve it from a cache. Jev's latency is flat in the number of questions. Ours grows, but the 4B and 9B answer 20 questions in half Jev's time and the 27B matches it. This run's client sat farther from every server than the load test's, which is why Jev's one-question time reads 191 ms here and 142 ms above.
 
 ![multiq](post/multiq.png)
 
 | Model | 1 question | 5 questions | 20 questions |
 |---|---:|---:|---:|
-| Hosted Jev | 142 ms | 166 ms | 170 ms |
-| Qwen3.5-4B | 60 ms | 61 ms | 98 ms |
-| Qwen3.5-9B | 54 ms | 59 ms | 100 ms |
-| Qwen3.8-27B | 80 ms | 100 ms | 200 ms |
+| Hosted Jev | 191 ms | 203 ms | 210 ms |
+| Qwen3.5-4B | 64 ms | 65 ms | 97 ms |
+| Qwen3.5-9B | 64 ms | 69 ms | 111 ms |
+| Qwen3.8-27B | 100 ms | 107 ms | 218 ms |
 
 ### Cost under load
 

@@ -3,15 +3,15 @@
 Owner key: **C** = Claude does it, **R** = Rob does it, **C→R** = Claude prepares, Rob runs or approves.
 
 ## Models
-- [ ] **C** Retrain Qwen3.5-4B on the public + synthetic mix (`jb_` run; launched).
-- [~] **C** Fit a calibration temperature per checkpoint on the synthetic dev split; serve it, record it in the checkpoint metadata. 27B done (T=1.70, dev ECE 0.059 to 0.038); 4B after its retrain.
-- [ ] **C** Deploy the retrained 4B, score it on JevBench public items, Jev's official 102, and the holdout.
-- [ ] **C** One final load test with Jev + 4B + 9B + 27B (all retrained where applicable) and the 1/5/20 test; refresh README numbers and charts (`refresh_numbers.py`, `post_charts.py`).
+- [x] **C** Retrain Qwen3.5-4B on the public + synthetic mix (`jb_20260923-002700_4b`; holdout 87.7%).
+- [x] **C** Calibration temperatures fitted and stored: 27B T=1.70 (JevBench calibration axis 71.9 to 80.6), 4B T=1.96 (dev ECE 0.121 to 0.045).
+- [x] **C** Retrained 4B deployed and scored: JevBench 181/231 (hard 59.5%, I=70.6), Jev's official 84/102, holdout 87.7%.
+- [x] **C** Final load test `final9_20260923-014354` and multiq `multiq_invoice_bust_final9_20260923-014923`; README tables and charts refreshed from them.
 
 ## Weights on Hugging Face
 - [x] **C** `publish_weights.py`: packages LoRA adapters + pointer head + temperature + metadata from the Modal volume into a Hugging Face repo per model, with a model card.
 - [x] **C** `serve_local.py`: plain FastAPI server (no Modal) that loads the base model from the Hub and our checkpoint, exposes `/score` with the same contract; this is what the JevBench maintainer runs.
-- [~] **C** Weights uploaded as private repos: `robbalian/rev-qwen3.8-27b` (with T=1.70), `robbalian/rev-qwen3.5-9b`; the 4B follows its retrain. **R** flips them public with the repo.
+- [x] **C** Weights uploaded as private repos: `robbalian/rev-qwen3.5-4b` (T=1.96), `robbalian/rev-qwen3.5-9b`, `robbalian/rev-qwen3.8-27b` (T=1.70). **R** flips them public with the repo.
 
 ## Repo public
 - [x] **C** `LICENSE` (MIT, your name), README pass for public readers (Run it section added).
@@ -21,7 +21,7 @@ Owner key: **C** = Claude does it, **R** = Rob does it, **C→R** = Claude prepa
 ## JevBench submission
 - [x] **C** Adapter for their harness (`jevbench_adapter/rev_http.py` + registration patch + tests), verified through their own runner: 208/231 live (one near-even item flips run to run).
 - [x] **C** Cost basis: `jevbench_adapter/COST_BASIS.md` (Modal list price at measured throughput; hosted-tariff estimate at 604 tokens/decision).
-- [~] **C→R** Issue text drafted at `jevbench_adapter/ISSUE.md` (TODOs: commit hash, weight revisions, 4B numbers). Claude posts it once the repo and weights are public.
+- [~] **C→R** Issue text drafted at `jevbench_adapter/ISSUE.md` (TODOs left: commit hash, weight revisions, overlap-check path; filled at posting time). Claude posts it once the repo and weights are public.
 - [ ] **C→R** Adapter PR from a fork (after the issue).
 
 ## Decision Index (the Hugging Face Space leaderboard)

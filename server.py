@@ -318,7 +318,7 @@ def serve(name,checkpoint_run,max_rows=128,max_padded_tokens=49152,window_ms=2.0
 
 COMMON=dict(port=8000,routing_region='us-west',cpu=8,memory=98304,max_containers=1,scaledown_window=300,startup_timeout=1800,unauthenticated=True,volumes={'/cache':cache,'/runs':runs})
 # Checkpoint run directories on the jev-decision-training volume. Edit before `modal deploy`.
-CHECKPOINTS={'27b_jb':'jb_20260922-211844_27b','9b':'full_20260922-091011_9b','27b':'full_20260922-091011_27b','4b':'full_20260922-091011_4b','2b':'full_20260922-091011_2b','4b_workflow':'synth_20260922-122120_4b','4b_balanced':'balanced_20260922-144201_4b','9b_balanced':'balanced_20260922-144201_9b'}
+CHECKPOINTS={'4b_jb':'jb_20260923-002700_4b','27b_jb':'jb_20260922-211844_27b','9b':'full_20260922-091011_9b','27b':'full_20260922-091011_27b','4b':'full_20260922-091011_4b','2b':'full_20260922-091011_2b','4b_workflow':'synth_20260922-122120_4b','4b_balanced':'balanced_20260922-144201_4b','9b_balanced':'balanced_20260922-144201_9b'}
 
 @app.server(image=blackwell_image,gpu='B200',compute_region='us-west',**COMMON)
 class Small9b:
@@ -353,6 +353,10 @@ class Small4h:
 class Small4b:
  @modal.enter()
  def start(self):serve('Qwen/Qwen3.5-4B',CHECKPOINTS['4b'])
+@app.server(image=blackwell_image,gpu='B200',compute_region='us-west',**COMMON)
+class Small4jb:
+ @modal.enter()
+ def start(self):serve('Qwen/Qwen3.5-4B',CHECKPOINTS['4b_jb'])
 
 @app.server(image=hopper_image,gpu='H100!',compute_region='us-west',**COMMON)
 class Small2h:

@@ -1,3 +1,0 @@
-Overlap check: 26077 training rows (data/train.jsonl.gz + data/synth_jevbench.jsonl.gz) vs 231 JevBench public items
-keys: exact and 120-character prefix of normalized state and instructions (min 40 chars)
-hits: 0
